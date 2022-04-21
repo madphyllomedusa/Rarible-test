@@ -87,7 +87,7 @@ function drawNFT(nftData: Item){
         let background = await loadImage(
             path.join(__dirname, '../test.png')
         )
-        let nftImage = await loadImage(`${nftData.meta?.content[1].url}`)
+        let nftImage = await loadImage(`${nftData.meta?.content[0].url}`)
         
         /*let nftImage = await loadImage(
             path.join(__dirname, '../babies.png')
@@ -99,7 +99,7 @@ function drawNFT(nftData: Item){
         context.fillRect(0,0,1600,900)
         context.drawImage(background, 0,0,1600,900)
         //const buffer = canvas.toBuffer('image/png')
-        context.drawImage(nftImage,0,0,500,500) 
+        context.drawImage(nftImage,150,400,450,450) 
         const buffer = canvas.toBuffer('image/png')
         fs.writeFileSync('./commands/rarible.png',buffer)
         resolve(true)

@@ -38,7 +38,7 @@ export default{
             embed
             .setTitle(`${nftData.meta?.name}`)
             .setDescription(`${nftData.collection}`)
-            .setImage(`${nftData.meta?.content[2].url}`)
+            .setImage(`${nftData.meta?.content[0].url}`)
 
             return embed    
             
