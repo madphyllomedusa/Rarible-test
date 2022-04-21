@@ -1,6 +1,6 @@
-import WOKCommands, { ICommand } from 'wokcommands'
+/*import WOKCommands, { ICommand } from 'wokcommands'
 import { MessageEmbed, MessageAttachment } from "discord.js";
-import {sendApiRequest} from "../models/api"
+import {getItemByIdRequest} from "../models/api"
 import {Item} from "@rarible/api-client/build/models/Item"
 import { getItemByIdRequestLinkSetup } from '../models/addtional_modules'; 
 import { createCanvas,loadImage,registerFont } from 'canvas';
@@ -30,7 +30,7 @@ export default{
 
         if(interaction){
             link3[0] = getItemByIdRequestLinkSetup(link3[0])
-            nftData = await sendApiRequest(link3[0]).then(data => {
+            nftData = await getItemByIdRequest(link3[0]).then(data => {
                 nftData = data
                 //console.log(data)
                 return data
@@ -45,4 +45,4 @@ export default{
         }
     }
     
-}as ICommand
+}as ICommand*/
