@@ -20,5 +20,3 @@ export function getItemByIdRequest(url){
         xhr.send()
     })
 }
-
-console.log("git test")
