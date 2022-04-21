@@ -1,6 +1,6 @@
 import { MessageEmbed } from "discord.js";
 import { ICommand } from "wokcommands";
-import {getItemByIdRequest} from "../models/api"
+import {sendApiRequest} from "../models/api"
 import {Item} from "@rarible/api-client/build/models/Item"
 
 export default{
@@ -14,7 +14,7 @@ export default{
         
         let nftData: Item
 
-        nftData = await getItemByIdRequest().then(data => {
+        nftData = await sendApiRequest().then(data => {
             nftData = data
             //console.log(data)
             return data

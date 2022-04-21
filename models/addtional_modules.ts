@@ -41,7 +41,7 @@ export function getItemByIdRequestLinkSetup(url: string){
 }
 
 export function getCollectionByIdRequestLinkSetup(contractAdress: string){
-    return `https://api-staging.rarible.org/v0.1/collections/${contractAdress}`
+    return `https://api.rarible.org/v0.1/collections/${contractAdress}`
 }
 //const resultlink = apiRequestLinkSetup(url)
 //console.log(resultlink)
