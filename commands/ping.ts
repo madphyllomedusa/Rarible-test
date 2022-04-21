@@ -1,25 +1,48 @@
-/*import { ICommand } from 'wokcommands'
-//import {sendRequest} from "../models/api"
+import WOKCommands, { ICommand } from 'wokcommands'
+import { MessageEmbed, MessageAttachment } from "discord.js";
+import {getItemByIdRequest} from "../models/api"
 import {Item} from "@rarible/api-client/build/models/Item"
-import { MessageEmbed } from "discord.js";
+import { getItemByIdRequestLinkSetup } from '../models/addtional_modules'; 
+import { createCanvas,loadImage,registerFont } from 'canvas';
 
-export default {
-  category: 'Testing',
-  description: 'Replies with pong', // Required for slash commands
-  
-  slash: true, // Create both a slash and legacy command
-  testOnly: true, // Only register a slash command for the testing guilds
-  
-  callback: async ({message,text}) => {
-    let nftData: Promise<Item>
+
+export default{
+    category: 'testing link',
+    description: 'reply link',
+
+    slash: true,
+    testOnly: true,
+    options: [{
+        name: 'link3',
+        description: ' link from rarible 2',
+        required: true,
+        type: 'STRING',
+    },
+    ],
+
+
+
+    callback: async ({interaction,args,message,text}) =>{
+
+        const link3 = args
+        let nftData: Item
+        const embed = new MessageEmbed()
+
+        if(interaction){
+            link3[0] = getItemByIdRequestLinkSetup(link3[0])
+            nftData = await getItemByIdRequest(link3[0]).then(data => {
+                nftData = data
+                //console.log(data)
+                return data
+            })
+            embed
+            .setTitle(`${nftData.meta?.name}`)
+            .setDescription(`${nftData.collection}`)
+            .setImage(`${nftData.meta?.content[0].url}`)
+
+            return embed    
+            
+        }
+    }
     
-   // nftData = sendRequest().then(data => {
-      console.log(data)
-      return data
-    })
-    //getNftDataById("ETHEREUM:0x5cc5b05a8a13e3fbdb0bb9fccd98d38e50f90c38:19037")
-    const embed = new MessageEmbed()
-      .setTitle('your NFT bro')
-      //.setDescription(`Collection: ${nftData.then(data => {return data.collection})}`)
-  },
-} as ICommand*/ 
+}as ICommand
