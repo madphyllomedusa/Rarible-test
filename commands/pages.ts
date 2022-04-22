@@ -154,7 +154,7 @@ export default{
                 }
             }
         }
-
+        //
         const embed = embeds[pages[id]]
         let reply: any
         let collector
