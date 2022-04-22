@@ -45,3 +45,7 @@ export function getCollectionByIdRequestLinkSetup(contractAdress: string){
 }
 //const resultlink = apiRequestLinkSetup(url)
 //console.log(resultlink)
+
+export function getItemsByCollectionRequest(collection: string, size: number, continuation?: string){
+    return `https://api.rarible.org/v0.1/items/`
+}
