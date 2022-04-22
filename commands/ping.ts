@@ -3,7 +3,8 @@ import { MessageEmbed, MessageAttachment } from "discord.js";
 import {sendApiRequest} from "../models/api"
 import {Item} from "@rarible/api-client/build/models/Item"
 import {Collection} from "@rarible/api-client/build/models/Collection"
-import { getItemByIdRequestLinkSetup, getCollectionByIdRequestLinkSetup } from '../models/addtional_modules'; 
+import {Items} from "@rarible/api-client/build/models/Items"
+import { getItemByIdRequestLinkSetup, getCollectionByIdRequestLinkSetup, getItemsByCollectionRequest } from '../models/addtional_modules'; 
 import { createCanvas,loadImage,registerFont } from 'canvas';
 
 
@@ -27,30 +28,40 @@ export default{
 
         const link3 = args
         let nftData: Item
+        let itemsCollection: Items
         let collectionData: Collection
         const embed = new MessageEmbed()
 
         if(interaction){
+            interaction.deferReply()
             link3[0] = getItemByIdRequestLinkSetup(link3[0])
             console.log(`item request ${link3[0]}`)
             nftData = await sendApiRequest(link3[0]).then(data => {
-                nftData = data
-                //console.log(data)
                 return data
-            })
+            }).catch(error => {console.log(error)})
             link3[0] = getCollectionByIdRequestLinkSetup(nftData.collection?.toString()!)
             console.log(`collection request ${link3[0]}`)
            collectionData = await sendApiRequest(link3[0]).then(data =>{
                 return data
-            })
+            }).catch(error => {console.log(error)})
             console.log(collectionData.name)
+            link3[0] = getItemsByCollectionRequest(nftData.collection!, 1000)
+            console.log(`item by collection ${link3[0]}`)
+            itemsCollection = await sendApiRequest(link3[0]).then(data =>{
+                return data
+            }).catch(error => {console.log(error)})
+            //if(itemsCollection.total == 1000)
+            console.log(itemsCollection)
 
+            
             embed
             .setTitle(`${nftData.meta?.name}`)
             .setDescription(`${collectionData.name}`)
             .setImage(`${nftData.meta?.content[0].url}`)
 
-            return embed    
+            interaction.editReply({
+                embeds: [embed]
+            })
             
         }
     }

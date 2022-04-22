@@ -47,5 +47,14 @@ export function getCollectionByIdRequestLinkSetup(contractAdress: string){
 //console.log(resultlink)
 
 export function getItemsByCollectionRequest(collection: string, size: number, continuation?: string){
-    return `https://api.rarible.org/v0.1/items/`
+    //let collectionArray = collection.split(':')
+    //collection = `${collectionArray[0]}?${collectionArray[1]}`
+    console.log(collection)
+    if(continuation == undefined){
+        return `https://api.rarible.org/v0.1/items/byCollection?collection=${collection}&size=${size}`
+    }else {
+        return `https://api.rarible.org/v0.1/items/byCollection?collection=${collection}&continuation=${continuation}&size=${size}`
+    }
+    
 }
+
