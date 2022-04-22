@@ -43,25 +43,8 @@ const getRow = (id:string) =>{
 const pages = {} as { [key: string]:number}
 let embeds:MessageEmbed[]
 //embeds[0].setTitle('hello niggers')
-const getRow = (id:string) =>{
-    const row = new MessageActionRow()
 
-    row.addComponents(
-        new MessageButton()
-            .setCustomId('Prev')
-            .setStyle('SECONDARY')
-            .setEmoji('⬅️')
-            .setDisabled(pages[id] === 0)
-    )
-    row.addComponents(
-        new MessageButton()
-            .setCustomId('Next')
-            .setStyle('SECONDARY')
-            .setEmoji('➡️')
-            .setDisabled(pages[id] === embeds.length -1)
-    )
-        return row
-}
+
 export default{
     category: 'testing link',
     description: 'reply link',
@@ -78,6 +61,27 @@ export default{
     
     callback: async({user,message,interaction,channel,args}) => {
         embeds = []
+        
+        const getRow = (id:string) =>{
+            const row = new MessageActionRow()
+        
+            row.addComponents(
+                new MessageButton()
+                    .setCustomId(`${interaction.id}Prev`)
+                    .setStyle('SECONDARY')
+                    .setEmoji('⬅️')
+                    .setDisabled(pages[id] === 0)
+            )
+            row.addComponents(
+                new MessageButton()
+                    .setCustomId(`${interaction.id}Next`)
+                    .setStyle('SECONDARY')
+                    .setEmoji('➡️')
+                    .setDisabled(pages[id] === embeds.length -1)
+            )
+                return row
+        }
+
         for (let a = 0; a < 2; ++a){
             embeds.push(new MessageEmbed().setFooter(`Page ${a+1}`))
         }
@@ -100,39 +104,38 @@ export default{
        collectionData = await sendApiRequest(link3[0]).then(data =>{
             return data
         })
-         
-            ///
-        //embeds[0].setTitle('hello kurwa')
+       
+        let ethAuthor : string = nftData.creators[0].account
+        let ethOwner : string  = nftData.owners![0]
+        
         embeds[0].setTitle(`${nftData.meta?.name}`)
         embeds[0].setURL(`${collectionData.meta?.externalLink}`)
-        //embeds[0].setDescription(`Collection: ${collectionData.name}`)
         embeds[0].addField('Collection: ' , `${collectionData.name}`)
-        //embeds[0].addField('\u200B','\u200B')
         embeds[0].addField('Blockchain: ' ,`${nftData.blockchain}`)
-        if(nftData.owners?.length == 0){
+        if(nftData.owners?.length == 0 || nftData.owners == undefined){
             embeds[0].addField('Owner','Not Owned')
         }else{
-            console.log(`${nftData.owners}`)
-            embeds[0].addField('Owner:', `chlen ${nftData.owners}`)
+            let splitOwner = ethOwner.split(':')
+            ethOwner = splitOwner[1]
+            embeds[0].addField('Owner:', `${ethOwner}`)
         }
-        if(nftData.creators?.length == 0){
+        if(nftData.creators?.length == 0 || nftData.creators == undefined){
             embeds[0].addField('Author: ','Dont have author')
         }else{
-            embeds[0].addField('Author: ', `${nftData.creators[0].account}`)
+            let splitAuthor = ethAuthor.split(':')
+            ethAuthor = splitAuthor[1]
+            embeds[0].addField('Author: ', `${ethAuthor}`)
         }
 
         embeds[0].setImage(`${nftData.meta?.content[0].url}`)
         embeds[0].setColor('YELLOW')
-        //console.log(`${nftData.owners}`)
-        /*if(nftData.owners == null){
-            embeds[0].addField('Owner:', `${nftData.owners}`)
-        }*/
+        //embeds[1].setColor('YELLOW')
         embeds[0].addField('Price: ' , `${nftData.bestSellOrder?.makePrice}${ethEmoji}`)
         embeds[1].setTitle('hello zxc')
         
         
         const embed = embeds[pages[id]]
-        let reply: Message | undefined
+        let reply: any
         let collector
         
         //const filter = (i: Interaction) => i.user.id === user.id
@@ -143,23 +146,21 @@ export default{
         const time = 1000 * 60 * 2
         console.log(`user id ${user.id}`)
         console.log(`interection id ${interaction.id}`)
-        if(message){
+        if(message) {
             reply = await message.reply({
-                embeds: [embed],
-                components: [getRow(id)],
-            })
-            
-            collector = reply.createMessageComponentCollector({filter,time})
-        }else{
-        await interaction.reply({
-            embeds: [embed],
-            ephemeral: true,
-            components: [getRow(id)]
-        })
-
-            collector = channel.createMessageComponentCollector({filter,time})
+                  embeds: [embed],
+                  components: [getRow(id)],
+              })
+          } else {
+            reply = await interaction.reply({
+              embeds: [embed],
+              components: [getRow(id)],
+              fetchReply: true
+          })
         }
-            collector.on('collect', async(ButtonInteraction) =>{
+            collector = reply.createMessageComponentCollector({filter,time})
+
+            collector.on('collect', async(ButtonInteraction: any) =>{
             
             if(!ButtonInteraction){
                 return
@@ -168,15 +169,15 @@ export default{
             console.log(`button custom id ${ButtonInteraction.customId}`)
 
             if(
-                ButtonInteraction.customId !== 'Prev' &&
-                ButtonInteraction.customId !== 'Next'
+                ButtonInteraction.customId !== `${interaction.id}Prev` &&
+                ButtonInteraction.customId !== `${interaction.id}Next`
             ){
                 return
             }
-            if(ButtonInteraction.customId === 'Prev'&& pages[id]>0){
+            if(ButtonInteraction.customId === `${interaction.id}Prev`&& pages[id]>0){
                 --pages[id]
             }else if(
-                ButtonInteraction.customId === 'Next' &&
+                ButtonInteraction.customId === `${interaction.id}Next` &&
                 pages[id]<embeds.length -1
             ){
                 ++pages[id]
