@@ -105,6 +105,8 @@ export default{
             return data
         })
        
+        
+        let tempAtributes = nftData.meta?.attributes.length
         let ethAuthor : string = nftData.creators[0].account
         let ethOwner : string  = nftData.owners![0]
         
@@ -126,23 +128,38 @@ export default{
             ethAuthor = splitAuthor[1]
             embeds[0].addField('Author: ', `${ethAuthor}`)
         }
-//
+
         embeds[0].setImage(`${nftData.meta?.content[0].url}`)
         embeds[0].setColor('YELLOW')
-        //embeds[1].setColor('YELLOW')
+        embeds[1].setColor('YELLOW')
         embeds[0].addField('Price: ' , `${nftData.bestSellOrder?.makePrice}${ethEmoji}`)
-        embeds[1].setTitle('hello zxc')
-        
-        
+        embeds[1].setTitle(`Rarity score: 45642`)
+
+        if(nftData.meta?.attributes.length == 0 || nftData.meta?.attributes.length == undefined){
+            embeds[1].setColor('YELLOW')
+            embeds[1].setTitle(`Rarity score: 1`)
+            embeds[1].setDescription('We cant calculate Rarity score coz this NFT dont have attributes')
+        }else{
+            embeds[1].setColor('YELLOW')
+            embeds[1].setTitle(`Rarity score: `)
+            embeds[1].setImage(`${nftData.meta?.content[0].url}`)
+            for(let i = 0; i < tempAtributes!;++i){
+                if(tempAtributes !== 0){
+                    embeds[1].addFields(
+                        {name: `${nftData.meta.attributes[i].key}`, value: `${nftData.meta.attributes[i].value}`, inline: true},
+                        {name:`Score: `, value:`Score Value`, inline: true },
+                        { name: '\u200B', value: '\u200B' },
+                        )
+                }
+            }
+        }
+
         const embed = embeds[pages[id]]
         let reply: any
         let collector
         
-        //const filter = (i: Interaction) => i.user.id === user.id
         const filter = (i: Interaction) => {
-            //i.defferUpdate()
             return i.user.id === user.id}
-        //const filterI = (i: Interaction) => i.id === interaction.id
         const time = 1000 * 60 * 2
         console.log(`user id ${user.id}`)
         console.log(`interection id ${interaction.id}`)
