@@ -2,7 +2,6 @@ import DiscordJS, { Intents } from 'discord.js'
 import WOKCommands from 'wokcommands'
 import path from 'path'
 import dotenv from 'dotenv'
-import canvas, { Canvas } from 'canvas'
 import mongoose from 'mongoose'
 dotenv.config()
 
