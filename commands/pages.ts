@@ -10,7 +10,8 @@ import {
 import {ICommand} from 'wokcommands'
 import {sendApiRequest} from "../models/api"
 import {Item} from "@rarible/api-client/build/models/Item"
-import { getItemByIdRequestLinkSetup } from '../models/addtional_modules'; 
+import {Collection} from "@rarible/api-client/build/models/Collection"
+import { getItemByIdRequestLinkSetup, getCollectionByIdRequestLinkSetup } from '../models/addtional_modules'; 
 
 /*const embeds: MessageEmbed[] = []
 const pages = {} as { [key: string]:number}
@@ -78,27 +79,40 @@ export default{
     callback: async({user,message,interaction,channel,args}) => {
         embeds = []
         for (let a = 0; a < 2; ++a){
-            embeds.push(new MessageEmbed().setDescription(`Page ${a+1}`))
+            embeds.push(new MessageEmbed().setFooter(`Page ${a+1}`))
         }
         const id = user.id
         pages[id] = pages[id] || 0
         const link3 = args
         let nftData: Item
+        let collectionData: Collection
         const ethEmoji = "<:ethemoji:966805976160297080>"
 
         link3[0] = getItemByIdRequestLinkSetup(link3[0])
-            nftData = await sendApiRequest(link3[0]).then(data => {
-                nftData = data
-                //console.log(data)
-                return data
-            })
+        console.log(`item request ${link3[0]}`)
+        nftData = await sendApiRequest(link3[0]).then(data => {
+            nftData = data
+            //console.log(data)
+            return data
+        })
+        link3[0] = getCollectionByIdRequestLinkSetup(nftData.collection?.toString()!)
+        console.log(`collection request ${link3[0]}`)
+       collectionData = await sendApiRequest(link3[0]).then(data =>{
+            return data
+        })
          
             ///
         //embeds[0].setTitle('hello kurwa')
         embeds[0].setTitle(`${nftData.meta?.name}`)
-        embeds[0].setDescription(`${nftData.collection}`)
+        embeds[0].setDescription(`Collection: ${collectionData.name}`)
+        embeds[0].addFields(
+            {name: 'Blockchain: ' , value:`${nftData.blockchain}`},
+            {name: '\u200B', value: '\u200B' },
+            {name: 'Blockchain collection:', value: `${nftData.collection}`,inline: true},
+            {name: 'Collection link: ' , value: `${collectionData.meta?.externalLink}`,inline:true},
+        )
         embeds[0].setImage(`${nftData.meta?.content[0].url}`)
-        embeds[0].setColor('DARK_GOLD')
+        embeds[0].setColor('YELLOW')
         //console.log(`${nftData.owners}`)
         /*if(nftData.owners == null){
             embeds[0].addField('Owner:', `${nftData.owners}`)
