@@ -104,13 +104,23 @@ export default{
             ///
         //embeds[0].setTitle('hello kurwa')
         embeds[0].setTitle(`${nftData.meta?.name}`)
-        embeds[0].setDescription(`Collection: ${collectionData.name}`)
-        embeds[0].addFields(
-            {name: 'Blockchain: ' , value:`${nftData.blockchain}`},
-            {name: '\u200B', value: '\u200B' },
-            {name: 'Blockchain collection:', value: `${nftData.collection}`,inline: true},
-            {name: 'Collection link: ' , value: `${collectionData.meta?.externalLink}`,inline:true},
-        )
+        embeds[0].setURL(`${collectionData.meta?.externalLink}`)
+        //embeds[0].setDescription(`Collection: ${collectionData.name}`)
+        embeds[0].addField('Collection: ' , `${collectionData.name}`)
+        //embeds[0].addField('\u200B','\u200B')
+        embeds[0].addField('Blockchain: ' ,`${nftData.blockchain}`)
+        if(nftData.owners?.length == 0){
+            embeds[0].addField('Owner','Not Owned')
+        }else{
+            console.log(`${nftData.owners}`)
+            embeds[0].addField('Owner:', `chlen ${nftData.owners}`)
+        }
+        if(nftData.creators?.length == 0){
+            embeds[0].addField('Author: ','Dont have author')
+        }else{
+            embeds[0].addField('Author: ', `${nftData.creators[0].account}`)
+        }
+
         embeds[0].setImage(`${nftData.meta?.content[0].url}`)
         embeds[0].setColor('YELLOW')
         //console.log(`${nftData.owners}`)
@@ -143,6 +153,7 @@ export default{
         }else{
         await interaction.reply({
             embeds: [embed],
+            ephemeral: true,
             components: [getRow(id)]
         })
 
@@ -182,7 +193,9 @@ export default{
             }else{
                 await interaction.editReply({
                     embeds: [embeds[pages[id]],
+                    
                 ],
+                    
                     components: [getRow(id)],
                     
                 })
