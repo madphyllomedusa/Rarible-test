@@ -90,7 +90,7 @@ export default{
         const link3 = args
         let nftData: Item
         let collectionData: Collection
-        const ethEmoji = "<:ethemoji:966805976160297080>"
+        const ethEmoji = "<:ethemoji:967093487357009960>"
 
         link3[0] = getItemByIdRequestLinkSetup(link3[0])
         console.log(`item request ${link3[0]}`)
@@ -112,10 +112,11 @@ export default{
         
         embeds[0].setTitle(`${nftData.meta?.name}`)
         embeds[0].setURL(`${collectionData.meta?.externalLink}`)
+        embeds[0].setThumbnail(`${collectionData.meta?.content[0].url}`)
         embeds[0].addField('Collection: ' , `${collectionData.name}`)
         embeds[0].addField('Blockchain: ' ,`${nftData.blockchain}`)
         if(nftData.owners?.length == 0 || nftData.owners == undefined){
-            embeds[0].addField('Owner','Not Owned')
+            embeds[0].addField('Owner','No owner')
         }else{
             let splitOwner = ethOwner.split(':')
             ethOwner = splitOwner[1]
@@ -130,8 +131,8 @@ export default{
         }
 
         embeds[0].setImage(`${nftData.meta?.content[0].url}`)
-        embeds[0].setColor('YELLOW')
-        embeds[1].setColor('YELLOW')
+        embeds[0].setColor('#ffcc00')
+        embeds[1].setColor('#ffcc00')
         embeds[0].addField('Price: ' , `${nftData.bestSellOrder?.makePrice}${ethEmoji}`)
         embeds[1].setTitle(`Rarity score: 45642`)
 
