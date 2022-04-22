@@ -12,6 +12,8 @@ import {sendApiRequest} from "../models/api"
 import {Item} from "@rarible/api-client/build/models/Item"
 import {Collection} from "@rarible/api-client/build/models/Collection"
 import { getItemByIdRequestLinkSetup, getCollectionByIdRequestLinkSetup } from '../models/addtional_modules'; 
+import { rarityCounter } from '../models/rarity_score'
+import { Properties } from '../models/models'
 
 /*const embeds: MessageEmbed[] = []
 const pages = {} as { [key: string]:number}
@@ -61,7 +63,7 @@ export default{
     
     callback: async({user,message,interaction,channel,args}) => {
         embeds = []
-        
+        interaction.deferReply()
         const getRow = (id:string) =>{
             const row = new MessageActionRow()
         
@@ -90,6 +92,8 @@ export default{
         const link3 = args
         let nftData: Item
         let collectionData: Collection
+        let RarityScore: number = 0
+
         const ethEmoji = "<:ethemoji:967093487357009960>"
 
         link3[0] = getItemByIdRequestLinkSetup(link3[0])
@@ -101,11 +105,22 @@ export default{
         })
         link3[0] = getCollectionByIdRequestLinkSetup(nftData.collection?.toString()!)
         console.log(`collection request ${link3[0]}`)
-       collectionData = await sendApiRequest(link3[0]).then(data =>{
+        collectionData = await sendApiRequest(link3[0]).then(data =>{
             return data
         })
-       
-        
+        let countedProperties: Properties
+        countedProperties = await rarityCounter(nftData).then(data=>{return data})
+        console.log(`-------------${countedProperties.attributesArray.length}`)
+        for(let i = 0; i < countedProperties.attributesArray.length; ++i){
+            let temp = countedProperties.attributesArray[i].rarityScore
+            console.log(`rarity score ${temp}`)
+            countedProperties.attributesArray[i].rarityScore = countedProperties.collectionTotal / temp
+            console.log(countedProperties.attributesArray[i].rarityScore)
+            countedProperties.attributesArray[i].rarityPerc = temp / countedProperties.collectionTotal
+            console.log(countedProperties.attributesArray[i].rarityPerc)
+            RarityScore += countedProperties.attributesArray[i].rarityScore
+            console.log(`summary rarity score ${RarityScore}`)
+        }
         let tempAtributes = nftData.meta?.attributes.length
         let ethAuthor : string = nftData.creators[0].account
         let ethOwner : string  = nftData.owners![0]
@@ -142,14 +157,17 @@ export default{
             embeds[1].setDescription('We cant calculate Rarity score coz this NFT dont have attributes')
         }else{
             embeds[1].setColor('YELLOW')
-            embeds[1].setTitle(`Rarity score: `)
+            embeds[1].setTitle(`Rarity score: ${RarityScore}`)
             embeds[1].setImage(`${nftData.meta?.content[0].url}`)
             for(let i = 0; i < tempAtributes!;++i){
                 if(tempAtributes !== 0){
                     embeds[1].addFields(
                         {name: `${nftData.meta.attributes[i].key}`, value: `${nftData.meta.attributes[i].value}`, inline: true},
-                        {name:`Score: `, value:`Score Value`, inline: true },
+                        {name:`Score: ${countedProperties.attributesArray[i].rarityScore}`, 
+                         value:`${countedProperties.attributesArray[i].rarityPerc}% rarity`, inline: true },
                         { name: '\u200B', value: '\u200B' },
+                        //{name: '', value: `${nftData.meta.attributes[i].value}`},
+                        //{ name: '\u200B', value: '\u200B' },
                         )
                 }
             }
@@ -170,10 +188,10 @@ export default{
                   components: [getRow(id)],
               })
           } else {
-            reply = await interaction.reply({
+            reply = await interaction.editReply({
               embeds: [embed],
               components: [getRow(id)],
-              fetchReply: true
+              //fetchReply: true
           })
         }
             collector = reply.createMessageComponentCollector({filter,time})
