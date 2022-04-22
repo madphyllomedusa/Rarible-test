@@ -126,7 +126,7 @@ export default{
             ethAuthor = splitAuthor[1]
             embeds[0].addField('Author: ', `${ethAuthor}`)
         }
-
+//
         embeds[0].setImage(`${nftData.meta?.content[0].url}`)
         embeds[0].setColor('YELLOW')
         //embeds[1].setColor('YELLOW')
