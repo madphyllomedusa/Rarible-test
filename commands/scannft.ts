@@ -5,7 +5,8 @@ import {
     Message,
     MessageActionRow,
     MessageButton,
-    MessageEmbed
+    MessageEmbed, 
+    MessageAttachment
 } from 'discord.js'
 import {ICommand} from 'wokcommands'
 import {sendApiRequest} from "../models/api"
@@ -110,7 +111,9 @@ export default{
 
         let ethOwner: string
         let ethAuthor: string
-        let Attachment: string
+        let Attachment: string = "IMAGE"
+        let attachment: MessageAttachment
+
         itemAPILink = getItemByIdRequestLinkSetup(sourceLink[0])
         console.log(`item request ${itemAPILink}`)
         await sendApiRequest(itemAPILink).then(async (data) => {
@@ -132,6 +135,11 @@ export default{
                 }else{
                     if(nftData.meta?.content[pos].url !== undefined){
                         Attachment = nftData.meta?.content[pos].url
+                        attachment = new MessageAttachment('../animation.mp4')
+                        //embeds[0].video!.url = Attachment
+                        //embeds[0].setImage(Attachment)
+                        
+                        console.log(`ATTACHMENT LINK: ${Attachment}`)
                     }
                 } 
             }else {
@@ -190,7 +198,9 @@ export default{
                                 }
                             }
 
-                        }).catch()
+                        }).catch(error => {
+
+                        })
                     }
                 }).catch(error => {
 
@@ -232,6 +242,8 @@ export default{
             
             //embeds[1].setTitle(`Rarity score: 45642`)
 
+        }).catch(error => {
+
         })
         
         //
@@ -250,11 +262,18 @@ export default{
                   components: [getRow(id)],
               })
           } else {
-            reply = await interaction.editReply({
+              //if(Attachment !== "IMAGE"){
+              console.log("FIRST REPLY")
+              reply = await interaction.editReply({
               embeds: [embed],
               components: [getRow(id)],
               //fetchReply: true
-          })
+              })
+              if(Attachment !== "IMAGE"){
+                channel.send({
+                    content: Attachment
+                })
+              }
         }
             collector = reply.createMessageComponentCollector({filter,time})
 
@@ -283,19 +302,49 @@ export default{
             }
 
             if(reply){
-                reply.edit({
-                    embeds: [embeds[pages[id]],
-                ],
-                    components: [getRow(id)],
+                console.log("REPLY ROOT")
+                if(Attachment !== "IMAGE"){
+                    reply.edit({
+                        embeds: [embeds[pages[id]],
+                        
+                    ],
+                       
+                        components: [getRow(id)],
+                        //content: Attachment
+                        //files: attachment
+                        
+                    })
+                   // channel.send({
+                     //   content: Attachment
+                    //})
                     
-                })
+                }else {
+                    reply.edit({
+                        embeds: [embeds[pages[id]],
+                    ],
+                    components: [getRow(id)],
+                    })
+                }
             }else{
-                await interaction.editReply({
-                    embeds: [embeds[pages[id]],
-                ],
-                    components: [getRow(id)],
+                if(Attachment !== "IMAGE"){
+                    console.log("NO IMAGE")
+                    await interaction.editReply({
+                        
+                        embeds: [embeds[pages[id]]
+                        
+                    ],
+                        components: [getRow(id)],
+                        
+                    })
+                }else {
+                    console.log("THIS ROOT")
+                    await interaction.editReply({
+                        embeds: [embeds[pages[id]],
+                        ],
+                        components: [getRow(id)],
                     
-                })
+                    })
+                }
             }
         })
     },
