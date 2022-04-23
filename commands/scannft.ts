@@ -64,7 +64,10 @@ export default{
     
     callback: async({user,message,interaction,channel,args}) => {
         embeds = []
-        interaction.deferReply()
+        //interaction.deferReply()
+        interaction.reply({
+            content: "Diving deep into blockchain..."
+        })
         const getRow = (id:string) =>{
             const row = new MessageActionRow()
         
@@ -109,15 +112,19 @@ export default{
         const TEZOS_Collection: string = "TEZOS:KT18pVpRXKPY2c4U2yFEGSH3ZnhB2kL8kwXS"
         const POLYGON_Collection: string = "POLYGON:0x35f8aee672cdE8e5FD09C93D2BfE4FF5a9cF0756"
 
+        const embedError = new MessageEmbed().setImage('https://imgur.com/a/FNHOXR7')
+
         let ethOwner: string
         let ethAuthor: string
         let Attachment: string = "IMAGE"
         let attachment: MessageAttachment
+        let itemRequest_passed: boolean = true
 
         itemAPILink = getItemByIdRequestLinkSetup(sourceLink[0])
         console.log(`item request ${itemAPILink}`)
         await sendApiRequest(itemAPILink).then(async (data) => {
             //данные из токена
+        
             nftData = data
             ethAuthor = nftData.creators[0].account
             ethOwner  = nftData.owners![0]
@@ -242,110 +249,144 @@ export default{
             
             //embeds[1].setTitle(`Rarity score: 45642`)
 
-        }).catch(error => {
-
-        })
-        
-        //
-        const embed = embeds[pages[id]]
-        let reply: any
-        let collector
-        
-        const filter = (i: Interaction) => {
-            return i.user.id === user.id}
-        const time = 1000 * 60 * 2
-        console.log(`user id ${user.id}`)
-        console.log(`interection id ${interaction.id}`)
-        if(message) {
-            reply = await message.reply({
-                  embeds: [embed],
-                  components: [getRow(id)],
-              })
-          } else {
-              //if(Attachment !== "IMAGE"){
-              console.log("FIRST REPLY")
-              reply = await interaction.editReply({
-              embeds: [embed],
-              components: [getRow(id)],
-              //fetchReply: true
-              })
-              if(Attachment !== "IMAGE"){
-                channel.send({
-                    content: Attachment
-                })
-              }
-        }
-            collector = reply.createMessageComponentCollector({filter,time})
-
-            collector.on('collect', async(ButtonInteraction: any) =>{
             
-            if(!ButtonInteraction){
-                return
-            }
-            ButtonInteraction.deferUpdate()
-            console.log(`button custom id ${ButtonInteraction.customId}`)
 
-            if(
-                ButtonInteraction.customId !== `${interaction.id}Prev` &&
-                ButtonInteraction.customId !== `${interaction.id}Next`
-            ){
-                return
-            }
-            if(ButtonInteraction.customId === `${interaction.id}Prev`&& pages[id]>0){
-                --pages[id]
-            }else if(
-                ButtonInteraction.customId === `${interaction.id}Next` &&
-                pages[id]<embeds.length -1
-            ){
-                ++pages[id]
-                
-            }
-
-            if(reply){
-                console.log("REPLY ROOT")
-                if(Attachment !== "IMAGE"){
-                    reply.edit({
-                        embeds: [embeds[pages[id]],
-                        
-                    ],
-                       
-                        components: [getRow(id)],
-                        //content: Attachment
-                        //files: attachment
-                        
-                    })
-                   // channel.send({
-                     //   content: Attachment
-                    //})
-                    
-                }else {
-                    reply.edit({
-                        embeds: [embeds[pages[id]],
-                    ],
-                    components: [getRow(id)],
-                    })
-                }
+        }).catch(async (error) => {
+            itemRequest_passed = false
+            console.log(error)
+            //interaction.deferReply()
+        })
+        console.log(`REQUEST_RESULT: ${itemRequest_passed}`)
+        const embed = embeds[pages[id]]
+            let reply: any
+            let collector
+            
+            const filter = (i: Interaction) => {
+                return i.user.id === user.id}
+            const time = 1000 * 60 * 2
+            console.log(`user id ${user.id}`)
+            console.log(`interection id ${interaction.id}`)
+            if(!itemRequest_passed){
+                if(message) {
+                    reply = await message.reply({
+                          embeds: [embedError],
+                          //components: [getRow(id)],
+                      })
+                  } else {
+                        console.log("ERROR REPLY")
+                        console.log(`INTERACTION REPLIED? ${interaction.replied}`)
+                        if(!interaction.replied){
+                            console.log(`INTERACTION REPLIED? V2 ${interaction.replied}`)
+                            interaction.deleteReply()
+                            console.log(`INTERACTION REPLIED? V4 ${interaction.replied}`)
+                            reply = await interaction.reply({
+                                content: " ",
+                                embeds: [embedError],
+                                //components: [getRow(id)],
+                            })
+                        }else{
+                            console.log(`INTERACTION REPLIED? V3 ${interaction.replied}`)
+                        reply = await interaction.editReply({
+                            content: " ",
+                            embeds: [embedError],
+                            //components: [getRow(id)],
+                        })
+                        }
+                    }
             }else{
-                if(Attachment !== "IMAGE"){
-                    console.log("NO IMAGE")
-                    await interaction.editReply({
-                        
-                        embeds: [embeds[pages[id]]
-                        
-                    ],
+            if(message) {
+                reply = await message.reply({
+                      embeds: [embed],
+                      components: [getRow(id)],
+                  })
+              } else {
+                    console.log("FIRST REPLY")
+                    reply = await interaction.editReply({
+                        content: " ",
+                        embeds: [embed],
                         components: [getRow(id)],
-                        
                     })
-                }else {
-                    console.log("THIS ROOT")
-                    await interaction.editReply({
-                        embeds: [embeds[pages[id]],
+                    if(Attachment !== "IMAGE"){
+                        channel.send({
+                            content: Attachment
+                        })
+                    }
+                    
+                }}
+                collector = reply.createMessageComponentCollector({filter,time})
+    
+                collector.on('collect', async(ButtonInteraction: any) =>{
+                
+                if(!ButtonInteraction){
+                    return
+                }
+                ButtonInteraction.deferUpdate()
+                console.log(`button custom id ${ButtonInteraction.customId}`)
+    
+                if(
+                    ButtonInteraction.customId !== `${interaction.id}Prev` &&
+                    ButtonInteraction.customId !== `${interaction.id}Next`
+                ){
+                    return
+                }
+                if(ButtonInteraction.customId === `${interaction.id}Prev`&& pages[id]>0){
+                    --pages[id]
+                }else if(
+                    ButtonInteraction.customId === `${interaction.id}Next` &&
+                    pages[id]<embeds.length -1
+                ){
+                    ++pages[id]
+                    
+                }
+    
+                if(reply){
+                    console.log("REPLY ROOT")
+                    if(Attachment !== "IMAGE"){
+                        reply.edit({
+                            embeds: [embeds[pages[id]],
+                            
+                        ],
+                           
+                            components: [getRow(id)],
+                            //content: Attachment
+                            //files: attachment
+                            
+                        })
+                       // channel.send({
+                         //   content: Attachment
+                        //})
+                        
+                    }else {
+                        reply.edit({
+                            embeds: [embeds[pages[id]],
                         ],
                         components: [getRow(id)],
-                    
-                    })
+                        })
+                    }
+                }else{
+                    if(Attachment !== "IMAGE"){
+                        console.log("NO IMAGE")
+                        await interaction.editReply({
+                            
+                            embeds: [embeds[pages[id]]
+                            
+                        ],
+                            components: [getRow(id)],
+                            
+                        })
+                    }else {
+                        console.log("THIS ROOT")
+                        await interaction.editReply({
+                            embeds: [embeds[pages[id]],
+                            ],
+                            components: [getRow(id)],
+                        
+                        })
+                    }
                 }
-            }
-        })
+            })
+        
+        //
+
     },
 }as ICommand
