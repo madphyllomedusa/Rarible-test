@@ -89,89 +89,151 @@ export default{
         }
         const id = user.id
         pages[id] = pages[id] || 0
-        const link3 = args
+        const sourceLink = args
         let nftData: Item
         let collectionData: Collection
         let RarityScore: number = 0
-
-        const ethEmoji = "<:ethemoji:967093487357009960>"
-
-        link3[0] = getItemByIdRequestLinkSetup(link3[0])
-        console.log(`item request ${link3[0]}`)
-        nftData = await sendApiRequest(link3[0]).then(data => {
-            nftData = data
-            //console.log(data)
-            return data
-        })
-        link3[0] = getCollectionByIdRequestLinkSetup(nftData.collection?.toString()!)
-        console.log(`collection request ${link3[0]}`)
-        collectionData = await sendApiRequest(link3[0]).then(data =>{
-            return data
-        })
+        let itemAPILink: string
+        let collectionAPILink: string
         let countedProperties: Properties
-        countedProperties = await rarityCounter(nftData).then(data=>{return data})
-        console.log(`-------------${countedProperties.attributesArray.length}`)
-        for(let i = 0; i < countedProperties.attributesArray.length; ++i){
-            let temp = countedProperties.attributesArray[i].rarityScore
-            console.log(`rarity score ${temp}`)
-            countedProperties.attributesArray[i].rarityScore = countedProperties.collectionTotal / temp
-            console.log(countedProperties.attributesArray[i].rarityScore)
-            countedProperties.attributesArray[i].rarityPerc = temp / countedProperties.collectionTotal
-            console.log(countedProperties.attributesArray[i].rarityPerc)
-            RarityScore += countedProperties.attributesArray[i].rarityScore
-            console.log(`summary rarity score ${RarityScore}`)
-        }
-        let tempAtributes = nftData.meta?.attributes.length
-        let ethAuthor : string = nftData.creators[0].account
-        let ethOwner : string  = nftData.owners![0]
+
+        const ETH_Emoji: string = "<:ethemoji:967093487357009960>"
+        const wETH_Emoji: string = "<:weth:967455329338155119>"
+        const FLOW_Emoji: string = "<:flow:967454651320528968>"
+        const XTZ_Emoji: string = "<:tezos:967452701581508608>"
+        const MATIC_Emoji: string = "<:matic:967451814536556555>"
         
-        embeds[0].setTitle(`${nftData.meta?.name}`)
-        embeds[0].setURL(`${collectionData.meta?.externalLink}`)
-        embeds[0].setThumbnail(`${collectionData.meta?.content[0].url}`)
-        embeds[0].addField('Collection: ' , `${collectionData.name}`)
-        embeds[0].addField('Blockchain: ' ,`${nftData.blockchain}`)
-        if(nftData.owners?.length == 0 || nftData.owners == undefined){
-            embeds[0].addField('Owner','No owner')
-        }else{
-            let splitOwner = ethOwner.split(':')
-            ethOwner = splitOwner[1]
-            embeds[0].addField('Owner:', `${ethOwner}`)
-        }
-        if(nftData.creators?.length == 0 || nftData.creators == undefined){
-            embeds[0].addField('Author: ','Dont have author')
-        }else{
-            let splitAuthor = ethAuthor.split(':')
-            ethAuthor = splitAuthor[1]
-            embeds[0].addField('Author: ', `${ethAuthor}`)
-        }
+        const ETH_Collection: string = "ETHEREUM:0x60f80121c31a0d46b5279700f9df786054aa5ee5" 
+        const FLOW_Collection: string = "FLOW:A.01ab36aaf654a13e.RaribleNFT"
+        const TEZOS_Collection: string = "TEZOS:KT18pVpRXKPY2c4U2yFEGSH3ZnhB2kL8kwXS"
+        const POLYGON_Collection: string = "POLYGON:0x35f8aee672cdE8e5FD09C93D2BfE4FF5a9cF0756"
 
-        embeds[0].setImage(`${nftData.meta?.content[0].url}`)
-        embeds[0].setColor('#ffcc00')
-        embeds[1].setColor('#ffcc00')
-        embeds[0].addField('Price: ' , `${nftData.bestSellOrder?.makePrice}${ethEmoji}`)
-        embeds[1].setTitle(`Rarity score: 45642`)
-
-        if(nftData.meta?.attributes.length == 0 || nftData.meta?.attributes.length == undefined){
-            embeds[1].setColor('YELLOW')
-            embeds[1].setTitle(`Rarity score: 1`)
-            embeds[1].setDescription('We cant calculate Rarity score coz this NFT dont have attributes')
-        }else{
-            embeds[1].setColor('YELLOW')
-            embeds[1].setTitle(`Rarity score: ${RarityScore}`)
-            embeds[1].setImage(`${nftData.meta?.content[0].url}`)
-            for(let i = 0; i < tempAtributes!;++i){
-                if(tempAtributes !== 0){
-                    embeds[1].addFields(
-                        {name: `${nftData.meta.attributes[i].key}`, value: `${nftData.meta.attributes[i].value}`, inline: true},
-                        {name:`Score: ${countedProperties.attributesArray[i].rarityScore}`, 
-                         value:`${countedProperties.attributesArray[i].rarityPerc}% rarity`, inline: true },
-                        { name: '\u200B', value: '\u200B' },
-                        //{name: '', value: `${nftData.meta.attributes[i].value}`},
-                        //{ name: '\u200B', value: '\u200B' },
-                        )
+        let ethOwner: string
+        let ethAuthor: string
+        let Attachment: string
+        itemAPILink = getItemByIdRequestLinkSetup(sourceLink[0])
+        console.log(`item request ${itemAPILink}`)
+        await sendApiRequest(itemAPILink).then(async (data) => {
+            //данные из токена
+            nftData = data
+            ethAuthor = nftData.creators[0].account
+            ethOwner  = nftData.owners![0]
+            if(nftData.meta?.content.length !== 0 || nftData.meta?.content !== undefined){
+                let onlyImage: boolean = true
+                let pos: number = 0
+                for(let i = 0; i < nftData.meta?.content.length!; ++i){
+                    if(nftData.meta?.content[i]['@type'] !== "IMAGE"){
+                        onlyImage = false
+                        pos = i
+                    }
                 }
+                if(onlyImage){
+                    embeds[0].setImage(`${nftData.meta?.content[0].url}`)
+                }else{
+                    if(nftData.meta?.content[pos].url !== undefined){
+                        Attachment = nftData.meta?.content[pos].url
+                    }
+                } 
+            }else {
+                //ВСТАВИТЬ НАШУ КАРТИНКУ 
             }
-        }
+            if(nftData.meta?.name !== undefined){
+                embeds[0].setTitle(`${nftData.meta?.name}`)
+            }else {
+                embeds[0].setTitle("No name")
+            }
+            if(nftData.collection !== undefined){
+                collectionAPILink = getCollectionByIdRequestLinkSetup(nftData.collection?.toString()!)
+                console.log(`COLLECTION API LINK: ${collectionAPILink}`)
+                await sendApiRequest(collectionAPILink).then(data => {
+                    collectionData = data
+                    if(collectionData.meta?.externalLink !== undefined){
+                        embeds[0].setURL(`${collectionData.meta?.externalLink}`)
+                    }
+                    if(collectionData.meta?.content[0].url !== undefined){
+                        embeds[0].setThumbnail(`${collectionData.meta?.content[0].url}`)
+                    }else {
+                        //ВСТАВИТЬ СВОЮ КАРТИНКУ КОЛЛЕКЦИИ
+                    }
+                    embeds[0].addField('Collection: ' , `${collectionData.name}`)
+                    if(collectionData.id !== ETH_Collection && collectionData.id !== FLOW_Collection && collectionData.id !== TEZOS_Collection && collectionData.id !== POLYGON_Collection){
+                        rarityCounter(nftData).then(data => {
+                            countedProperties = data
+                            for(let i = 0; i < countedProperties.attributesArray.length; ++i){
+                                let temp = countedProperties.attributesArray[i].rarityScore
+                                console.log(`rarity score ${temp}`)
+                                countedProperties.attributesArray[i].rarityScore = countedProperties.collectionTotal / temp
+                                console.log(countedProperties.attributesArray[i].rarityScore)
+                                countedProperties.attributesArray[i].rarityPerc = temp / countedProperties.collectionTotal
+                                console.log(countedProperties.attributesArray[i].rarityPerc)
+                                RarityScore += countedProperties.attributesArray[i].rarityScore
+                                console.log(`summary rarity score ${RarityScore}`)
+                            }
+                            embeds[1].setColor('#ffcc00')
+                            if(nftData.meta?.attributes.length == 0 || nftData.meta?.attributes.length == undefined){
+                                embeds[1].setColor('YELLOW')
+                                embeds[1].setTitle(`Rarity score: 1`)
+                                embeds[1].setDescription('We cant calculate Rarity score coz this NFT dont have attributes')
+                            }else{
+                                embeds[1].setColor('YELLOW')
+                                embeds[1].setTitle(`Rarity score: ${RarityScore}`)
+                                embeds[1].setImage(`${nftData.meta?.content[0].url}`)
+                                for(let i = 0; i < nftData.meta?.attributes.length!;++i){
+                                    if(nftData.meta?.attributes.length !== 0){
+                                        embeds[1].addFields(
+                                            {name: `${nftData.meta.attributes[i].key}`, value: `${nftData.meta.attributes[i].value}`, inline: true},
+                                            {name:`Score: ${countedProperties.attributesArray[i].rarityScore}`, 
+                                             value:`${countedProperties.attributesArray[i].rarityPerc}% rarity`, inline: true },
+                                            { name: '\u200B', value: '\u200B' },
+                                            )
+                                    }
+                                }
+                            }
+
+                        }).catch()
+                    }
+                }).catch(error => {
+
+                })
+            }
+            embeds[0].addField('Blockchain: ' ,`${nftData.blockchain}`)
+            
+            if(nftData.owners?.length == 0 || nftData.owners == undefined){
+                embeds[0].addField('Owner','No owner')
+            }else{
+                let splitOwner = ethOwner.split(':')
+                ethOwner = splitOwner[1]
+                embeds[0].addField('Owner:', `${ethOwner}`)
+            }
+            if(nftData.creators?.length == 0 || nftData.creators == undefined){
+                embeds[0].addField('Author: ','Dont have author')
+            }else{
+                let splitAuthor = ethAuthor.split(':')
+                ethAuthor = splitAuthor[1]
+                embeds[0].addField('Author: ', `${ethAuthor}`)
+            }
+            if(nftData.bestSellOrder?.makePrice !== undefined){
+                if(nftData.blockchain == "ETHEREUM"){
+                    embeds[0].addField('Price: ' , `${nftData.bestSellOrder?.makePrice}${ETH_Emoji}`)
+                } else if(nftData.blockchain == "FLOW"){
+                    embeds[0].addField('Price: ' , `${nftData.bestSellOrder?.makePrice}${FLOW_Emoji}`)
+                }else if(nftData.blockchain == "TEZOS"){
+                    embeds[0].addField('Price: ' , `${nftData.bestSellOrder?.makePrice}${XTZ_Emoji}`)
+                }
+                else if(nftData.blockchain == "POLYGON"){
+                    embeds[0].addField('Price: ' , `${nftData.bestSellOrder?.makePrice}${MATIC_Emoji}`)
+                }
+            }else{
+                embeds[0].addField('Not for sale','\u200B')
+            }
+            embeds[0].setColor('#ffcc00')
+            
+            //embeds[1].setColor('#ffcc00')
+            
+            //embeds[1].setTitle(`Rarity score: 45642`)
+
+        })
+        
         //
         const embed = embeds[pages[id]]
         let reply: any
@@ -230,9 +292,7 @@ export default{
             }else{
                 await interaction.editReply({
                     embeds: [embeds[pages[id]],
-                    
                 ],
-                    
                     components: [getRow(id)],
                     
                 })
