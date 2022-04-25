@@ -152,7 +152,7 @@ export function rarityCounter(nftData: Item){
                 request_passed = false
             })
             apiLink = getItemsByCollectionRequest(nftData.collection!, 1000, itemsCollection.continuation)
-            console.log(`collection total ${itemsCollection.total}, continuation key ${itemsCollection.continuation}, request_passed ${request_passed}`)
+            console.log(`collection total ${amountItemsInCollection}, continuation key ${itemsCollection.continuation}, request_passed ${request_passed}`)
         }while(itemsCollection.total >= 1000 && itemsCollection.continuation !== undefined && request_passed)
         calculatedRarity.collectionTotal = amountItemsInCollection
         console.log(`COLLECTION ITEMS TOTAL: ${calculatedRarity.collectionTotal}`)

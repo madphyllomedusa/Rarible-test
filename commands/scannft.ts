@@ -126,6 +126,7 @@ export default{
             //данные из токена
         
             nftData = data
+            console.log(`RESIVED DATA ${nftData}`)
             ethAuthor = nftData.creators[0].account
             ethOwner  = nftData.owners![0]
             if(nftData.meta?.content.length !== 0 || nftData.meta?.content !== undefined){
