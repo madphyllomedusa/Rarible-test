@@ -180,7 +180,7 @@ export default{
                                 console.log(`rarity score ${temp}`)
                                 countedProperties.attributesArray[i].rarityScore = countedProperties.collectionTotal / temp
                                 console.log(countedProperties.attributesArray[i].rarityScore)
-                                countedProperties.attributesArray[i].rarityPerc = temp / countedProperties.collectionTotal
+                                countedProperties.attributesArray[i].rarityPerc = (temp / countedProperties.collectionTotal) * 100
                                 console.log(countedProperties.attributesArray[i].rarityPerc)
                                 RarityScore += countedProperties.attributesArray[i].rarityScore
                                 console.log(`summary rarity score ${RarityScore}`)
@@ -192,16 +192,24 @@ export default{
                                 embeds[1].setDescription('We cant calculate Rarity score coz this NFT dont have attributes')
                             }else{
                                 embeds[1].setColor('#ffcc00')
-                                embeds[1].setTitle(`Rarity score: ${RarityScore}`)
+                                embeds[1].setTitle(`Rarity score: ${RarityScore.toFixed(2)}`)
                                 embeds[1].setImage(`${nftData.meta?.content[0].url}`)
                                 for(let i = 0; i < nftData.meta?.attributes.length!;++i){
                                     if(nftData.meta?.attributes.length !== 0){
+                                        if(countedProperties.attributesArray[i].rarityScore == countedProperties.collectionTotal){
+                                            embeds[1].addFields(
+                                                {name: `${nftData.meta.attributes[i].key}`, value: `${nftData.meta.attributes[i].value}`, inline: true},
+                                                {name:`Score: ${countedProperties.attributesArray[i].rarityScore.toFixed(2)}`, 
+                                                 value:`1 of 1`, inline: true },
+                                                { name: '\u200B', value: '\u200B' },
+                                                )
+                                        }else {
                                         embeds[1].addFields(
                                             {name: `${nftData.meta.attributes[i].key}`, value: `${nftData.meta.attributes[i].value}`, inline: true},
-                                            {name:`Score: ${countedProperties.attributesArray[i].rarityScore}`, 
-                                             value:`${countedProperties.attributesArray[i].rarityPerc}% rarity`, inline: true },
+                                            {name:`Score: ${countedProperties.attributesArray[i].rarityScore.toFixed(2)}`, 
+                                             value:`${countedProperties.attributesArray[i].rarityPerc.toFixed(2)}% rarity`, inline: true },
                                             { name: '\u200B', value: '\u200B' },
-                                            )
+                                            )}
                                     }
                                 }
                             }

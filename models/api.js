@@ -33,7 +33,7 @@ export function sendApiRequest(url){
         .then(data => {
             console.log(`data: ${data}`)
         resolve(data)})
-        .catch(erroe => {
+        .catch(error => {
             console.log(error)
             reject(error)
         })

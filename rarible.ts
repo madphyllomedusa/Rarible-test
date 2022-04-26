@@ -13,7 +13,7 @@ client.on('ready',async () => {
     console.log('bot ready')
     new WOKCommands(client, {
         commandDir: path.join(__dirname,'commands'),
-        featureDir: path.join(__dirname,'features'),
+        //featureDir: path.join(__dirname,'features'),
         typeScript: true,
         testServers:['965209143801704480'],
         mongoUri:process.env.MONGO_URI,
