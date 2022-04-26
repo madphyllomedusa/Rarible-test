@@ -187,11 +187,11 @@ export default{
                             }
                             embeds[1].setColor('#ffcc00')
                             if(nftData.meta?.attributes.length == 0 || nftData.meta?.attributes.length == undefined){
-                                embeds[1].setColor('YELLOW')
+                                embeds[1].setColor('#ffcc00')
                                 embeds[1].setTitle(`Rarity score: 1`)
                                 embeds[1].setDescription('We cant calculate Rarity score coz this NFT dont have attributes')
                             }else{
-                                embeds[1].setColor('YELLOW')
+                                embeds[1].setColor('#ffcc00')
                                 embeds[1].setTitle(`Rarity score: ${RarityScore}`)
                                 embeds[1].setImage(`${nftData.meta?.content[0].url}`)
                                 for(let i = 0; i < nftData.meta?.attributes.length!;++i){
