@@ -42,12 +42,10 @@ export default{
 						},
 					]),
 			)
-
-            //const addWalletImage = new MessageAttachment('./images/addWallet.png')
+			
             const embed = new MessageEmbed()
                 .setColor('#ffcc00')
                 .setTitle('Use your wallet')
-                .setDescription('sdhshdsdhns')
                 .setImage('https://cdn.discordapp.com/attachments/967536440743448627/968483220796637214/addWallet.png')
                 .setThumbnail('')
                 
