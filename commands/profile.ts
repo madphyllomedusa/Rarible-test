@@ -1,7 +1,6 @@
 import { Interaction, MessageActionRow, MessageSelectMenu,MessageEmbed, MessageAttachment } from 'discord.js'
 import { ICommand } from 'wokcommands'
-import path from 'path'
-import embed from './embed'
+
 
 
 export default{
@@ -42,7 +41,7 @@ export default{
 						},
 					]),
 			)
-			
+
             const embed = new MessageEmbed()
                 .setColor('#ffcc00')
                 .setTitle('Use your wallet')

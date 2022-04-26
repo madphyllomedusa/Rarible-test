@@ -5,7 +5,7 @@ import {Items} from "@rarible/api-client/build/models/Items"
 import { getItemByIdRequestLinkSetup, getItemsByCollectionRequest } from '../models/addtional_modules'; 
 import { Properties, MetaAttributes } from "./models";
 
-/*export function rarityCounter(nftData: Item){
+export function rarityCounter(nftData: Item){
     
     return new Promise<Properties>(async (resolve, reject)=>{
         
@@ -83,9 +83,9 @@ import { Properties, MetaAttributes } from "./models";
         await resolve(calculatedRarity)
         }
     })
-}*/
+}
 
-export function rarityCounter(nftData: Item){
+/*export function rarityCounter(nftData: Item){
 
     return new Promise<Properties>(async (resolve, reject)=>{
         let apiLink: string
@@ -122,4 +122,4 @@ export function rarityCounter(nftData: Item){
         }while(itemsCollection.total >= 1000 && itemsCollection.continuation !== undefined && request_passed)
 
     })
-}
+}*/

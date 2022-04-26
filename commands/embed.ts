@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+/*import { MessageEmbed } from "discord.js";
 import { ICommand } from "wokcommands";
 import {sendApiRequest} from "../models/api"
 import {Item} from "@rarible/api-client/build/models/Item"
@@ -26,4 +26,4 @@ export default{
             .setImage(`${nftData.meta?.content[2].url}`)
         return embed
     },
-}as ICommand
+}as ICommand*/
