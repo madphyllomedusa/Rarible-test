@@ -85,6 +85,7 @@ export default{
                     .setEmoji('➡️')
                     .setDisabled(pages[id] === embeds.length -1)
             )
+            
                 return row
         }
 
