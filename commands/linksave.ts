@@ -89,33 +89,33 @@ function drawNFT(nftData: Item){
         )
         let nftImage = await loadImage(`${nftData.meta?.content[0].url}`)
 
-        const canvas = createCanvas(500,500)
+        const canvas = createCanvas(1000,500)
         const context = canvas.getContext('2d')
         context.fillStyle = '#ff00ff'
-        context.fillRect(0,0,500,500)
-        context.drawImage(background, 0,0,5000,500)
+        context.fillRect(0,0,1000,500)
+        context.drawImage(background, 0,0,1000,500)
         //const buffer = canvas.toBuffer('image/png')
         context.drawImage(nftImage,150,400,2,2)
         context.fillStyle = "black"  
         context.lineWidth = 2.0
         context.beginPath()
-        context.moveTo(50, 20)
-        context.lineTo(50, 460)
-        context.lineTo(460, 460)
+        context.moveTo(30, 10)
+        context.lineTo(30, 460)
+        context.lineTo(970, 460)
         context.stroke()
-        context.font = '20px sans-serif'
         for(let i = 0; i < 5; i++) { 
             context.fillText((5 - i) * 20 /*Переменная цены*/ + "", 4, i * 80 + 60) 
-            
-            
+            context.beginPath() 
+            context.moveTo(25, i * 80 + 60) 
+            context.lineTo(30, i * 80 + 60)
+            context.stroke()
         }
-        context.font = '20px sans-serif'
-        for(var i=0; i < 4; i++) { 
-            context.fillText((i+1) * 20 /*Переменная скора*/+ "", 90+ i*100, 480)
+        for(var i=0; i<8; i++) { 
+            context.fillText((i+1) * 20 /*Переменная скора*/+ "", 90+ i*100, 475)
         }
-        context.moveTo(50,460)
+        context.moveTo(30,460)
         for(let i = 0; i<2/*переменная*/;i++){
-            context.lineTo(100/*Переменная скора - 50 */,120 /* переменная цены -460*/)
+            context.lineTo(100/*Переменная скора*/,120 /* переменная цены*/)
             context.stroke()
             //context.lineTo(70,140)   
         }
