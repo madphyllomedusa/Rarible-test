@@ -12,9 +12,9 @@ import {ICommand} from 'wokcommands'
 import {sendApiRequest} from "../models/api"
 import {Item} from "@rarible/api-client/build/models/Item"
 import {Collection} from "@rarible/api-client/build/models/Collection"
-import { getItemByIdRequestLinkSetup, getCollectionByIdRequestLinkSetup } from '../models/addtional_modules'; 
+import { getItemByIdRequestLinkSetup, getCollectionByIdRequestLinkSetup, attributesToProperties } from '../models/addtional_modules'; 
 import { rarityCounter } from '../models/rarity_score'
-import { Properties } from '../models/models'
+import { Properties, CollectionAttibutes } from '../models/models'
 
 /*const embeds: MessageEmbed[] = []
 const pages = {} as { [key: string]:number}
@@ -100,6 +100,7 @@ export default{
         let itemAPILink: string
         let collectionAPILink: string
         let countedProperties: Properties
+        let collectionVariants: CollectionAttibutes
 
         const ETH_Emoji: string = "<:ethemoji:967093487357009960>"
         const wETH_Emoji: string = "<:weth:967455329338155119>"
@@ -174,15 +175,17 @@ export default{
                     embeds[0].addField('Collection: ' , `${collectionData.name}`)
                     if(collectionData.id !== ETH_Collection && collectionData.id !== FLOW_Collection && collectionData.id !== TEZOS_Collection && collectionData.id !== POLYGON_Collection){
                         rarityCounter(nftData).then(data => {
-                            countedProperties = data
+                            collectionVariants = data
+                            countedProperties = attributesToProperties(collectionVariants, nftData)
+                            let rarityScore: number = 0
+                            let rarityPerc: number = 0
+
                             for(let i = 0; i < countedProperties.attributesArray.length; ++i){
-                                let temp = countedProperties.attributesArray[i].rarityScore
+                                let temp = countedProperties.attributesArray[i].amount
                                 console.log(`rarity score ${temp}`)
-                                countedProperties.attributesArray[i].rarityScore = countedProperties.collectionTotal / temp
-                                console.log(countedProperties.attributesArray[i].rarityScore)
-                                countedProperties.attributesArray[i].rarityPerc = (temp / countedProperties.collectionTotal) * 100
-                                console.log(countedProperties.attributesArray[i].rarityPerc)
-                                RarityScore += countedProperties.attributesArray[i].rarityScore
+                                rarityScore = countedProperties.collectionTotal / temp!
+                                console.log(rarityScore)
+                                RarityScore += rarityScore
                                 console.log(`summary rarity score ${RarityScore}`)
                             }
                             embeds[1].setColor('#ffcc00')
@@ -194,20 +197,20 @@ export default{
                                 embeds[1].setColor('#ffcc00')
                                 embeds[1].setTitle(`Rarity score: ${RarityScore.toFixed(2)}`)
                                 embeds[1].setImage(`${nftData.meta?.content[0].url}`)
-                                for(let i = 0; i < nftData.meta?.attributes.length!;++i){
+                                for(let i = 0; i < countedProperties.attributesArray.length!;++i){
                                     if(nftData.meta?.attributes.length !== 0){
-                                        if(countedProperties.attributesArray[i].rarityScore == countedProperties.collectionTotal){
+                                        if(countedProperties.attributesArray[i].amount == 1){
                                             embeds[1].addFields(
-                                                {name: `${nftData.meta.attributes[i].key}`, value: `${nftData.meta.attributes[i].value}`, inline: true},
-                                                {name:`Score: ${countedProperties.attributesArray[i].rarityScore.toFixed(2)}`, 
+                                                {name: `${countedProperties.attributesArray[i].key}`, value: `${countedProperties.attributesArray[i].value}`, inline: true},
+                                                {name:`Score: ${(countedProperties.collectionTotal / countedProperties.attributesArray[i].amount!).toFixed(2)}`, 
                                                  value:`1 of 1`, inline: true },
                                                 { name: '\u200B', value: '\u200B' },
                                                 )
                                         }else {
                                         embeds[1].addFields(
-                                            {name: `${nftData.meta.attributes[i].key}`, value: `${nftData.meta.attributes[i].value}`, inline: true},
-                                            {name:`Score: ${countedProperties.attributesArray[i].rarityScore.toFixed(2)}`, 
-                                             value:`${countedProperties.attributesArray[i].rarityPerc.toFixed(2)}% rarity`, inline: true },
+                                            {name: `${countedProperties.attributesArray[i].key}`, value: `${countedProperties.attributesArray[i].value}`, inline: true},
+                                            {name:`Score: ${(countedProperties.collectionTotal / countedProperties.attributesArray[i].amount!).toFixed(2)}`, 
+                                             value:`${((countedProperties.attributesArray[i].amount! / countedProperties.collectionTotal) * 100).toFixed(2)}% rarity`, inline: true },
                                             { name: '\u200B', value: '\u200B' },
                                             )}
                                     }
