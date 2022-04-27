@@ -65,6 +65,7 @@ export default{
     callback: async({user,message,interaction,channel,args}) => {
         embeds = []
         let reply: any
+        const sourceLink = args
         //interaction.deferReply()
         reply = await interaction.reply({
             content: "Diving deep into blockchain..."
@@ -86,16 +87,14 @@ export default{
                     .setEmoji('➡️')
                     .setDisabled(pages[id] === embeds.length -1)
             )
-            
                 return row
-        }
-
+            }
+       
         for (let a = 0; a < 1; ++a){
             embeds.push(new MessageEmbed().setFooter(`Page ${a+1}`))
         }
         const id = user.id
         pages[id] = pages[id] || 0
-        const sourceLink = args
         let nftData: Item
         let collectionData: Collection
         let RarityScore: number = 0
@@ -171,19 +170,23 @@ export default{
                 console.log(`COLLECTION API LINK: ${collectionAPILink}`)
                 await sendApiRequest(collectionAPILink).then(data => {
                     collectionData = data
-                    if(collectionData.meta?.externalLink !== undefined){
-                        embeds[0].setURL(`${collectionData.meta?.externalLink}`)
-                    }
+                    
+                        embeds[0].setURL(`${sourceLink[0]}`)
                     if(collectionData.meta?.content[0].url !== undefined){
                         embeds[0].setThumbnail(`${collectionData.meta?.content[0].url}`)
                     }else {
                         //ВСТАВИТЬ СВОЮ КАРТИНКУ КОЛЛЕКЦИИ
                     }
-                    embeds[0].addField('Collection: ' , `${collectionData.name}`)
+                    if(collectionData.meta?.externalLink !== undefined){
+                        embeds[0].addField('Collection: ' , `[${collectionData.name}](${collectionData.meta?.externalLink})`)
+                    } else{
+                        embeds[0].addField('Collection: ' , `${collectionData.name}`)
+                    }
+
                     if(collectionData.id !== ETH_Collection && collectionData.id !== FLOW_Collection && collectionData.id !== TEZOS_Collection && collectionData.id !== POLYGON_Collection){
                         embeds.push(new MessageEmbed().setFooter(`Page ${embeds.length+1}`))
                         console.log(`EMBEDS SIZE: ${embeds.length}`)
-                        //embeds[embeds.length-1] = embed_Score_Counting
+                        embeds[embeds.length-1] = embed_Score_Counting
                         rarityCounter(nftData).then(data => {
                             collectionVariants = data
                             countedProperties = attributesToProperties(collectionVariants, nftData)
