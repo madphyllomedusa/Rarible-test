@@ -64,8 +64,9 @@ export default{
     
     callback: async({user,message,interaction,channel,args}) => {
         embeds = []
+        let reply: any
         //interaction.deferReply()
-        interaction.reply({
+        reply = await interaction.reply({
             content: "Diving deep into blockchain..."
         })
         const getRow = (id:string) =>{
@@ -88,7 +89,7 @@ export default{
                 return row
         }
 
-        for (let a = 0; a < 2; ++a){
+        for (let a = 0; a < 1; ++a){
             embeds.push(new MessageEmbed().setFooter(`Page ${a+1}`))
         }
         const id = user.id
@@ -113,13 +114,16 @@ export default{
         const TEZOS_Collection: string = "TEZOS:KT18pVpRXKPY2c4U2yFEGSH3ZnhB2kL8kwXS"
         const POLYGON_Collection: string = "POLYGON:0x35f8aee672cdE8e5FD09C93D2BfE4FF5a9cF0756"
 
-        const embedError = new MessageEmbed().setImage('https://imgur.com/a/FNHOXR7')
+        const embed_Error_Link = new MessageEmbed().setImage('https://cdn.discordapp.com/attachments/967536440743448627/967536530681909288/wrongLinkRemoved.png')
+        const embed_Score_Counting = new MessageEmbed().setImage('https://cdn.discordapp.com/attachments/967536440743448627/968863419182755870/002-630x354.jpg')
 
         let ethOwner: string
         let ethAuthor: string
         let Attachment: string = "IMAGE"
         let attachment: MessageAttachment
         let itemRequest_passed: boolean = true
+
+        
 
         itemAPILink = getItemByIdRequestLinkSetup(sourceLink[0])
         console.log(`item request ${itemAPILink}`)
@@ -141,6 +145,8 @@ export default{
                 }
                 if(onlyImage){
                     embeds[0].setImage(`${nftData.meta?.content[0].url}`)
+                    console.log(`IMAGE LINK: ${nftData.meta?.content[0].url}`)
+                    console.log(`IMAGE HEIGHT ${embeds[0].image?.height}`)
                 }else{
                     if(nftData.meta?.content[pos].url !== undefined){
                         Attachment = nftData.meta?.content[pos].url
@@ -174,6 +180,9 @@ export default{
                     }
                     embeds[0].addField('Collection: ' , `${collectionData.name}`)
                     if(collectionData.id !== ETH_Collection && collectionData.id !== FLOW_Collection && collectionData.id !== TEZOS_Collection && collectionData.id !== POLYGON_Collection){
+                        embeds.push(new MessageEmbed().setFooter(`Page ${embeds.length+1}`))
+                        console.log(`EMBEDS SIZE: ${embeds.length}`)
+                        //embeds[embeds.length-1] = embed_Score_Counting
                         rarityCounter(nftData).then(data => {
                             collectionVariants = data
                             countedProperties = attributesToProperties(collectionVariants, nftData)
@@ -197,6 +206,7 @@ export default{
                                 embeds[1].setColor('#ffcc00')
                                 embeds[1].setTitle(`Rarity score: ${RarityScore.toFixed(2)}`)
                                 embeds[1].setImage(`${nftData.meta?.content[0].url}`)
+
                                 for(let i = 0; i < countedProperties.attributesArray.length!;++i){
                                     if(nftData.meta?.attributes.length !== 0){
                                         if(countedProperties.attributesArray[i].amount == 1){
@@ -216,7 +226,12 @@ export default{
                                     }
                                 }
                             }
-
+                            reply.edit({
+                                embeds: [embeds[pages[id]],
+                            ],
+                            components: [getRow(id)],
+                            })
+                            
                         }).catch(error => {
 
                         })
@@ -226,7 +241,7 @@ export default{
                 })
             }
             embeds[0].addField('Blockchain: ' ,`${nftData.blockchain}`)
-            
+            embeds[0].setDescription(' ')
             if(nftData.owners?.length == 0 || nftData.owners == undefined){
                 embeds[0].addField('Owner','No owner')
             }else{
@@ -261,144 +276,127 @@ export default{
             
             //embeds[1].setTitle(`Rarity score: 45642`)
 
+            console.log(`REQUEST_RESULT: ${itemRequest_passed}`)
+            const embed = embeds[pages[id]]
+                
+                let collector
+                
+                const filter = (i: Interaction) => {
+                    return i.user.id === user.id}
+                const time = 1000 * 60 * 2
+                console.log(`user id ${user.id}`)
+                console.log(`interection id ${interaction.id}`)
+      
+                if(message) {
+                    reply = await message.reply({
+                          embeds: [embed],
+                          components: [getRow(id)],
+                      })
+                  } else {
+                        console.log("FIRST REPLY")
+                        reply = await interaction.editReply({
+                            content: " ",
+                            embeds: [embeds[pages[id]],],
+                            components: [getRow(id)],
+                        })
+                        if(Attachment !== "IMAGE"){
+                            channel.send({
+                                content: Attachment
+                            })
+                        }
+                        
+                    }
+                    collector = reply.createMessageComponentCollector({filter,time})
+        
+                    collector.on('collect', async(ButtonInteraction: any) =>{
+                    
+                    if(!ButtonInteraction){
+                        return
+                    }
+                    ButtonInteraction.deferUpdate()
+                    console.log(`button custom id ${ButtonInteraction.customId}`)
+        
+                    if(
+                        ButtonInteraction.customId !== `${interaction.id}Prev` &&
+                        ButtonInteraction.customId !== `${interaction.id}Next`
+                    ){
+                        return
+                    }
+                    if(ButtonInteraction.customId === `${interaction.id}Prev`&& pages[id]>0){
+                        --pages[id]
+                    }else if(
+                        ButtonInteraction.customId === `${interaction.id}Next` &&
+                        pages[id]<embeds.length -1
+                    ){
+                        ++pages[id]
+                        
+                    }
+        
+                    if(reply){
+                        console.log("REPLY ROOT")
+                        if(Attachment !== "IMAGE"){
+                            reply.edit({
+                                embeds: [embeds[pages[id]],
+                                
+                            ],
+                               
+                                components: [getRow(id)],
+                                //content: Attachment
+                                //files: attachment
+                                
+                            })
+                           // channel.send({
+                             //   content: Attachment
+                            //})
+                            
+                        }else {
+                            reply.edit({
+                                embeds: [embeds[pages[id]],
+                            ],
+                            components: [getRow(id)],
+                            })
+                        }
+                    }else{
+                        if(Attachment !== "IMAGE"){
+                            console.log("NO IMAGE")
+                            await interaction.editReply({
+                                
+                                embeds: [embeds[pages[id]]
+                                
+                            ],
+                                components: [getRow(id)],
+                                
+                            })
+                        }else {
+                            console.log("THIS ROOT")
+                            await interaction.editReply({
+                                embeds: [embeds[pages[id]],
+                                ],
+                                components: [getRow(id)],
+                            
+                            })
+                        }
+                    }
+                })
+            
+            //
             
 
         }).catch(async (error) => {
             itemRequest_passed = false
             console.log(error)
-            //interaction.deferReply()
+            if(reply){
+            reply.edit({
+                content: " ",
+                embeds: [embed_Error_Link]
+            })}else {
+                await interaction.editReply({
+                    content: " ",
+                    embeds: [embed_Error_Link]
+                })  
+            }
         })
-        console.log(`REQUEST_RESULT: ${itemRequest_passed}`)
-        const embed = embeds[pages[id]]
-            let reply: any
-            let collector
-            
-            const filter = (i: Interaction) => {
-                return i.user.id === user.id}
-            const time = 1000 * 60 * 2
-            console.log(`user id ${user.id}`)
-            console.log(`interection id ${interaction.id}`)
-            if(!itemRequest_passed){
-                if(message) {
-                    reply = await message.reply({
-                          embeds: [embedError],
-                          //components: [getRow(id)],
-                      })
-                  } else {
-                        console.log("ERROR REPLY")
-                        console.log(`INTERACTION REPLIED? ${interaction.replied}`)
-                        if(!interaction.replied){
-                            console.log(`INTERACTION REPLIED? V2 ${interaction.replied}`)
-                            interaction.deleteReply()
-                            console.log(`INTERACTION REPLIED? V4 ${interaction.replied}`)
-                            reply = await interaction.reply({
-                                content: " ",
-                                embeds: [embedError],
-                                //components: [getRow(id)],
-                            })
-                        }else{
-                            console.log(`INTERACTION REPLIED? V3 ${interaction.replied}`)
-                        reply = await interaction.editReply({
-                            content: " ",
-                            embeds: [embedError],
-                            //components: [getRow(id)],
-                        })
-                        }
-                    }
-            }else{
-            if(message) {
-                reply = await message.reply({
-                      embeds: [embed],
-                      components: [getRow(id)],
-                  })
-              } else {
-                    console.log("FIRST REPLY")
-                    reply = await interaction.editReply({
-                        content: " ",
-                        embeds: [embed],
-                        components: [getRow(id)],
-                    })
-                    if(Attachment !== "IMAGE"){
-                        channel.send({
-                            content: Attachment
-                        })
-                    }
-                    
-                }}
-                collector = reply.createMessageComponentCollector({filter,time})
-    
-                collector.on('collect', async(ButtonInteraction: any) =>{
-                
-                if(!ButtonInteraction){
-                    return
-                }
-                ButtonInteraction.deferUpdate()
-                console.log(`button custom id ${ButtonInteraction.customId}`)
-    
-                if(
-                    ButtonInteraction.customId !== `${interaction.id}Prev` &&
-                    ButtonInteraction.customId !== `${interaction.id}Next`
-                ){
-                    return
-                }
-                if(ButtonInteraction.customId === `${interaction.id}Prev`&& pages[id]>0){
-                    --pages[id]
-                }else if(
-                    ButtonInteraction.customId === `${interaction.id}Next` &&
-                    pages[id]<embeds.length -1
-                ){
-                    ++pages[id]
-                    
-                }
-    
-                if(reply){
-                    console.log("REPLY ROOT")
-                    if(Attachment !== "IMAGE"){
-                        reply.edit({
-                            embeds: [embeds[pages[id]],
-                            
-                        ],
-                           
-                            components: [getRow(id)],
-                            //content: Attachment
-                            //files: attachment
-                            
-                        })
-                       // channel.send({
-                         //   content: Attachment
-                        //})
-                        
-                    }else {
-                        reply.edit({
-                            embeds: [embeds[pages[id]],
-                        ],
-                        components: [getRow(id)],
-                        })
-                    }
-                }else{
-                    if(Attachment !== "IMAGE"){
-                        console.log("NO IMAGE")
-                        await interaction.editReply({
-                            
-                            embeds: [embeds[pages[id]]
-                            
-                        ],
-                            components: [getRow(id)],
-                            
-                        })
-                    }else {
-                        console.log("THIS ROOT")
-                        await interaction.editReply({
-                            embeds: [embeds[pages[id]],
-                            ],
-                            components: [getRow(id)],
-                        
-                        })
-                    }
-                }
-            })
-        
-        //
+
 
     },
 }as ICommand
