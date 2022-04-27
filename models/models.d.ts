@@ -38,3 +38,8 @@ export declare type ItemInBase = {
     rarityScore: number;
     collectionRank: number;
 }
+
+export declare type ScorePrice = {
+    score: number;
+    price: string | undefined;
+}

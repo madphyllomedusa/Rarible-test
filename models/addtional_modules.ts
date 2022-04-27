@@ -5,8 +5,12 @@
 //https://rarible.com/token/polygon/0x588e505d214d1e24c0b0deaa53a963700a3dcffc:81828986316751803125285982581567898552560266892957231837264565462423134273549?tab=owners
 //let url = 'https://rarible.com/token/0xed5af388653567af2f388e6224dc7c4b3241c544:4694?tab=details'
 //let url = 'https://rarible.com/token/tezos/KT1PtNemJpLtKNCNBC5r15aRDvTonSMGcz1x:21?tab=owners'
-import { Properties, CollectionAttibutes, MetaAttributes} from "./models"
+import { Properties, CollectionAttibutes, MetaAttributes, ScorePrice} from "./models"
 import {Item} from "@rarible/api-client/build/models/Item"
+import { DataResolver, MessageAttachment, MessageEmbed } from "discord.js";
+import { createCanvas, loadImage } from 'canvas';
+import path from 'path'
+import fs from 'fs'
 export function getItemByIdRequestLinkSetup(url: string){
     let blockchain: string =''
     let contractAdress: string =''
@@ -94,6 +98,7 @@ export function attributesToProperties(collectionVariants: CollectionAttibutes, 
                         value: collectionVariants.attributes[j].values[collectionVariants.attributes[j].values.length].value,
                         amount: collectionVariants.attributes[j].values[collectionVariants.attributes[j].values.length].amount,
                     }
+
                 }
             }
             j++
@@ -101,4 +106,74 @@ export function attributesToProperties(collectionVariants: CollectionAttibutes, 
     }
 
     return countedProperties
+}
+
+function pointsSort(Points: Array<ScorePrice>){
+    let sorted: boolean = false
+    while(sorted == false){
+        sorted = true
+        for(let i = 0; i < Points.length-1; i++){
+            if(Points[i].score > Points[i+1].score){
+               let temp: ScorePrice = Points[i]
+               Points[i] = Points[i+1]
+               Points[i+1] = temp
+               sorted = false
+            }
+        }
+    }
+
+   
+    for (let i = 0; i < Points.length; ++i){
+        console.log(`POINT #${i}: ${Points[i].score} / ${Points[i].price}`)
+    }
+    return Points
+}
+
+
+export async function graphDrow(Points: Array<ScorePrice>){
+    Points = pointsSort(Points)
+    let hScore: number = Points[Points.length-1].score
+    let lScore: number = Points[0].score
+    let bar: number = (hScore - lScore) / 7
+
+    
+    let background = await loadImage(
+        path.join(__dirname, '../test.png')
+    )
+    //let nftImage = await loadImage(`${nftData.meta?.content[0].url}`)
+
+    const canvas = createCanvas(500,500)
+    const context = canvas.getContext('2d')
+    context.fillStyle = '#333333'
+    context.fillRect(0,0,500,500)
+    context.drawImage(background, 0,0,5000,500)
+    //const buffer = canvas.toBuffer('image/png')
+    //context.drawImage(nftImage,150,400,2,2)
+    context.fillStyle = "black"  
+    context.lineWidth = 2.0
+    context.beginPath()
+    context.moveTo(50, 20)
+    context.lineTo(50, 460)
+    context.lineTo(460, 460)
+    context.stroke()
+    context.font = '20px sans-serif'
+    for(let i = 0; i < 5; i++) { 
+        context.fillText((5 - i) * 20 /*Переменная цены*/ + "", 4, i * 80 + 60) 
+        
+        
+    }
+    context.font = '20px sans-serif'
+    for(var i=0; i < 7; i++) { 
+        context.fillText((i+1) * Math.trunc(bar) + "", 90+ i*100, 480)
+    }
+    context.moveTo(50,460)
+    for(let i = 0; i<2/*переменная*/;i++){
+        context.strokeStyle = '#ffcc00'
+        context.lineTo(100/*Переменная скора - 50 */,120 /* переменная цены -460*/)
+        context.stroke()
+        //context.lineTo(70,140)   
+    }
+
+    const buffer = canvas.toBuffer('image/png')
+    fs.writeFileSync('./commands/rarible.png',buffer)
 }

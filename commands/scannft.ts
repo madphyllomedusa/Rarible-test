@@ -112,7 +112,7 @@ export default{
         const ETH_Collection: string = "ETHEREUM:0x60f80121c31a0d46b5279700f9df786054aa5ee5" 
         const FLOW_Collection: string = "FLOW:A.01ab36aaf654a13e.RaribleNFT"
         const TEZOS_Collection: string = "TEZOS:KT18pVpRXKPY2c4U2yFEGSH3ZnhB2kL8kwXS"
-        const POLYGON_Collection: string = "POLYGON:0x35f8aee672cdE8e5FD09C93D2BfE4FF5a9cF0756"
+        const POLYGON_Collection: string = "POLYGON:0x35f8aee672cdE8e5FD09C93D2BfE4FF5a9cF0756" 
 
         const embed_Error_Link = new MessageEmbed().setImage('https://cdn.discordapp.com/attachments/967536440743448627/967536530681909288/wrongLinkRemoved.png')
         const embed_Score_Counting = new MessageEmbed().setImage('https://cdn.discordapp.com/attachments/967536440743448627/968863419182755870/002-630x354.jpg')
@@ -182,7 +182,7 @@ export default{
                     if(collectionData.id !== ETH_Collection && collectionData.id !== FLOW_Collection && collectionData.id !== TEZOS_Collection && collectionData.id !== POLYGON_Collection){
                         embeds.push(new MessageEmbed().setFooter(`Page ${embeds.length+1}`))
                         console.log(`EMBEDS SIZE: ${embeds.length}`)
-                        //embeds[embeds.length-1] = embed_Score_Counting
+                        embeds[embeds.length-1] = embed_Score_Counting
                         rarityCounter(nftData).then(data => {
                             collectionVariants = data
                             countedProperties = attributesToProperties(collectionVariants, nftData)
@@ -250,11 +250,11 @@ export default{
                 embeds[0].addField('Owner:', `${ethOwner}`)
             }
             if(nftData.creators?.length == 0 || nftData.creators == undefined){
-                embeds[0].addField('Author: ','Dont have author')
+                embeds[0].addField('Creator: ','No data about creator')
             }else{
                 let splitAuthor = ethAuthor.split(':')
                 ethAuthor = splitAuthor[1]
-                embeds[0].addField('Author: ', `${ethAuthor}`)
+                embeds[0].addField('Creator: ', `${ethAuthor}`)
             }
             if(nftData.bestSellOrder?.makePrice !== undefined){
                 if(nftData.blockchain == "ETHEREUM"){

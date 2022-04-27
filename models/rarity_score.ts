@@ -2,88 +2,8 @@ import {sendApiRequest} from "../models/api"
 import {Item} from "@rarible/api-client/build/models/Item"
 import {Collection} from "@rarible/api-client/build/models/Collection"
 import {Items} from "@rarible/api-client/build/models/Items"
-import { getItemByIdRequestLinkSetup, getItemsByCollectionRequest } from '../models/addtional_modules'; 
-import { Properties, MetaAttributes, CollectionAttibutes, AttributeKeys, AttributeValues } from "./models";
-
-/*export function rarityCounter(nftData: Item){
-    
-    return new Promise<Properties>(async (resolve, reject)=>{
-        
-        let apiLink: string
-        let itemsCollection: Items = {
-            total: 0,
-            continuation: "",
-            items: [] 
-        }
-        const calculatedRarity: Properties = {
-            attributesArray: [],
-            collectionTotal: 0
-        }
-        let request_passed: boolean = true
-        let amountItemsInCollection: number = 0
-        let attributeCounter: number = 0
-        for (let i = 0; i < nftData.meta?.attributes.length!; ++i){
-            let nftMeta: MetaAttributes = {
-                key: "",
-                value: "",
-                rarityScore: 0,
-                rarityPerc: 0
-            }
-            nftMeta.key = nftData.meta?.attributes[i].key
-            nftMeta.value = nftData.meta?.attributes[i].value
-            calculatedRarity.attributesArray.push(nftMeta)
-            for(let j = 0; j < calculatedRarity.attributesArray.length; ++j){
-                console.log(`INSTIDE FOR --KEY: ${calculatedRarity.attributesArray[j].key} VALUE: ${calculatedRarity.attributesArray[j].value} SCORE: ${calculatedRarity.attributesArray[j].rarityScore}`)
-            }
-            console.log("-------")
-        }
-        console.log(`COLLECTION ITEMS TOTAL: ${calculatedRarity.collectionTotal}`)
-        for(let i = 0; i < calculatedRarity.attributesArray.length; ++i){
-            console.log(`KEY: ${calculatedRarity.attributesArray[i].key} VALUE: ${calculatedRarity.attributesArray[i].value} SCORE: ${calculatedRarity.attributesArray[i].rarityScore}`)
-        }
-        apiLink = getItemsByCollectionRequest(nftData.collection!, 1000)
-        console.log(`ITEMS BY COLLECTION REQUEST LINK ${apiLink}`)
-        do{
-            console.log("INSIDE CHECK")
-            await sendApiRequest(apiLink).then(data => {
-                request_passed = true
-                itemsCollection = data
-                amountItemsInCollection += itemsCollection.total
-                for(let i = 0; i < nftData.meta?.attributes.length!; ++i){
-                    attributeCounter = 0
-                    for(let j = 0; j < itemsCollection.items.length; ++j){
-                        if(itemsCollection.items[j].meta?.attributes !== undefined || itemsCollection.items[j].meta?.attributes.length !== 0){
-                            for(let k = 0; k < itemsCollection.items[j].meta?.attributes.length!; ++k){
-                                if(nftData.meta?.attributes[i].key == itemsCollection.items[j].meta?.attributes[k].key && 
-                                    nftData.meta?.attributes[i].value == itemsCollection.items[j].meta?.attributes[k].value){
-                                        ++attributeCounter
-                                }
-                            }
-                        }   
-                    }
-                    calculatedRarity.attributesArray[i].rarityScore += attributeCounter
-                }
-                
-            }).catch(error => {
-                console.log(`GET ITEMS BY COLLECTION REQUEST FAILED with`)
-                console.log(`API LINK: ${apiLink}`)
-                console.log(error)
-                reject(error)
-                request_passed = false
-            })
-            apiLink = getItemsByCollectionRequest(nftData.collection!, 1000, itemsCollection.continuation)
-            console.log(`collection total ${amountItemsInCollection}, continuation key ${itemsCollection.continuation}, request_passed ${request_passed}`)
-        }while(itemsCollection.total >= 1000 && itemsCollection.continuation !== undefined && request_passed)
-        calculatedRarity.collectionTotal = amountItemsInCollection
-        console.log(`COLLECTION ITEMS TOTAL: ${calculatedRarity.collectionTotal}`)
-        for(let i = 0; i < calculatedRarity.attributesArray.length; ++i){
-            console.log(`KEY: ${calculatedRarity.attributesArray[i].key} VALUE: ${calculatedRarity.attributesArray[i].value} SCORE: ${calculatedRarity.attributesArray[i].rarityScore}`)
-        }
-        if(request_passed){
-        await resolve(calculatedRarity)
-        }
-    })
-}*/
+import { getItemByIdRequestLinkSetup, getItemsByCollectionRequest, graphDrow } from '../models/addtional_modules'; 
+import { CollectionAttibutes, AttributeKeys, AttributeValues, ScorePrice } from "./models";
 
 export function rarityCounter(nftData: Item){
 
@@ -94,11 +14,9 @@ export function rarityCounter(nftData: Item){
             continuation: "",
             items: [] 
         }
-       // const calculatedRarity: Properties = {
-       //     attributesArray: [],
-        //    collectionTotal: 0
-        //}
+       
         let COLLECTION: Array<Item> = []
+        let graphPoints: Array<ScorePrice> = []
         let request_passed: boolean = true
         let key_found: boolean = false
         let attribute_found: boolean = false
@@ -188,50 +106,37 @@ export function rarityCounter(nftData: Item){
                 console.log(`       VALUE: ${collectionVariants.attributes[i].values[j].value}`)
             }
         }
-        /*for(let i = 0; i < COLLECTION.length; ++i){
-            for(let j = 0; j < COLLECTION[i].meta?.attributes.length!; ++j){
-                for(let k = 0; k < collectionVariants.attributes.length; ++k){
-                    if(collectionVariants.attributes[k].key == COLLECTION[i].meta?.attributes[j].key){
-                        for(let l = 0; l < collectionVariants.attributes[k].values.length; ++l){
-                            let types_amount: number = collectionVariants.attributes[k].values.length
-                            if(collectionVariants.attributes[k].values[l].value == COLLECTION[i].meta?.attributes[j].value){
-                                collectionVariants.attributes[k].values[l].amount++
-                            }
-                            else {
-                                collectionVariants.attributes[k].values[types_amount].amount++
-                            }
-                        }
-                    }
-                }
-            }
-        }*/
+        
         for(let i = 0; i < COLLECTION.length; ++i){
-            for(let j = 0; j < COLLECTION[i].meta?.attributes.length!; ++j){
-                let k = 0
+            for(let j = 0; j < collectionVariants.attributes.length; ++j){
                 key_found = false
-                while(k < collectionVariants.attributes.length && key_found == false){
-                    if(collectionVariants.attributes[k].key == COLLECTION[i].meta?.attributes[j].key){
+                let k = 0
+                while(k < COLLECTION[i].meta?.attributes.length! && key_found == false){
+                    if(COLLECTION[i].meta?.attributes[k].key == collectionVariants.attributes[j].key){
+                        //console.log(" KEY FOUND")
                         key_found = true
                         attribute_found = false
                         let l = 0
-                        let types_amount: number = collectionVariants.attributes[k].values.length
-                        while(l < collectionVariants.attributes[k].values.length && attribute_found == false){
-                            if(collectionVariants.attributes[k].values[l].value == COLLECTION[i].meta?.attributes[j].value){
+                        while(l < collectionVariants.attributes[j].values.length && attribute_found == false){
+                            if(collectionVariants.attributes[j].values[l].value == COLLECTION[i].meta?.attributes[k].value){
                                 attribute_found = true
-                                collectionVariants.attributes[k].values[l].amount++
+                                collectionVariants.attributes[j].values[l].amount++
                             }
                             l++
                         }
-                        if(attribute_found == false){
-                            collectionVariants.attributes[k].values[types_amount].amount++
-                        }
+
                     }
                     k++
                 }
+                if(key_found == false){
+                    //console.log(`NONE TRAIT`)
+                    let types_amount = collectionVariants.attributes[j].values.length
+                    collectionVariants.attributes[j].values[types_amount-1].amount++
+                }
             }
         }
-        collectionVariants.collectionTotal = COLLECTION.length
-        console.log(`COLLECTION ATTRIBUTES: `)
+
+         console.log(`COLLECTION ATTRIBUTES: `)
         for(let i = 0; i < collectionVariants.attributes.length; ++i){
             console.log(`   KEY: ${collectionVariants.attributes[i].key}`)
             console.log(`   AMOUNT OF TYPES: ${collectionVariants.attributes[i].values.length}`)
@@ -240,6 +145,57 @@ export function rarityCounter(nftData: Item){
                 console.log(`       AMOUNT: ${collectionVariants.attributes[i].values[j].amount}`)
             }
         }
+        
+        collectionVariants.collectionTotal = COLLECTION.length
+        for (let i = 0; i < COLLECTION.length; ++i){
+            if(COLLECTION[i].bestSellOrder?.makePrice !== undefined){
+                let RarityScore: number = 0
+                for(let j = 0; j < collectionVariants.attributes.length; ++j){
+                    key_found = false
+                    let k = 0
+                    while(k < COLLECTION[i].meta?.attributes.length! && key_found == false){
+                        //console.log(`${COLLECTION[i].meta?.attributes[k].key} == ${collectionVariants.attributes[j].key}`)
+                        if(COLLECTION[i].meta?.attributes[k].key == collectionVariants.attributes[j].key){
+                            //console.log(" KEY FOUND")
+                            key_found = true
+                            attribute_found = false
+                            let l = 0
+                            while(l < collectionVariants.attributes[j].values.length && attribute_found == false){
+                                if(collectionVariants.attributes[j].values[l].value == COLLECTION[i].meta?.attributes[k].value){
+                                    attribute_found = true
+                                    RarityScore += (collectionVariants.collectionTotal / collectionVariants.attributes[j].values[l].amount)
+                                }
+                                l++
+                            }
+
+                        }
+                        k++
+                    }
+                    if(key_found == false){
+                        //console.log(`NONE TRAIT`)
+                        let types_amount = collectionVariants.attributes[j].values.length
+                        RarityScore += (collectionVariants.collectionTotal / collectionVariants.attributes[j].values[types_amount-1].amount)
+                    }
+                }
+                let newEl: ScorePrice = {
+                    score: RarityScore,
+                    price: COLLECTION[i].bestSellOrder?.makePrice?.toString(),
+                }
+                //console.log(`ERERE RER ${newEl.price}   ${newEl.score}`)
+                graphPoints.push(newEl)
+            }
+        }
+        /*console.log(`COLLECTION ATTRIBUTES: `)
+        for(let i = 0; i < collectionVariants.attributes.length; ++i){
+            console.log(`   KEY: ${collectionVariants.attributes[i].key}`)
+            console.log(`   AMOUNT OF TYPES: ${collectionVariants.attributes[i].values.length}`)
+            for(let j = 0; j < collectionVariants.attributes[i].values.length; ++j){
+                console.log(`       VALUE: ${collectionVariants.attributes[i].values[j].value}`)
+                console.log(`       AMOUNT: ${collectionVariants.attributes[i].values[j].amount}`)
+            }
+        }*/
+        console.log(`POINTS AMOUNT: ${graphPoints.length}`)
+        graphDrow(graphPoints)
         console.log(`RARITY SCORE RESOLVED`)
         resolve(collectionVariants)
 
