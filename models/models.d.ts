@@ -7,11 +7,34 @@ export declare type MetaAttributes = {
     value?: string;
     type?: string;
     format?: string;
-    rarityPerc: number;
-    rarityScore: number;
+    amount?: number;
 }
 
 export declare type Properties = {
     attributesArray: Array<MetaAttributes>;
     collectionTotal: number;
 };
+
+export declare type AttributeValues = {
+    value: string | undefined;
+    amount: number;
+}
+
+export declare type AttributeKeys = {
+    key: string | undefined;
+    values: Array<AttributeValues>
+}
+
+export declare type CollectionAttibutes = {
+    collectionId: string;
+    attributes: Array<AttributeKeys>
+    collectionTotal: number
+}
+
+export declare type ItemInBase = {
+    tokenId: string;
+    collectionId: string;
+    attributes: Array<MetaAttributes>
+    rarityScore: number;
+    collectionRank: number;
+}
