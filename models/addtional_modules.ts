@@ -142,7 +142,7 @@ export async function graphDrow(Points: Array<ScorePrice>){
     )
     //let nftImage = await loadImage(`${nftData.meta?.content[0].url}`)
 
-    const canvas = createCanvas(500,500)
+    const canvas = createCanvas(1920, 1080)
     const context = canvas.getContext('2d')
     context.fillStyle = '#333333'
     context.fillRect(0,0,500,500)
