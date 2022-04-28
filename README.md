@@ -7,4 +7,4 @@ https://discord.com/api/oauth2/authorize?client_id=969233705652592670&permission
 TOKEN=YOUR_TOKEN_HERE
 
 Список возможных команд:
-/scannft - аналитика NFT по ссылке 
+/nftscan - аналитика NFT по ссылке 
