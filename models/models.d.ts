@@ -29,6 +29,8 @@ export declare type CollectionAttibutes = {
     collectionId: string;
     attributes: Array<AttributeKeys>
     collectionTotal: number
+    Acoff: number;
+    Bcoff: number;
 }
 
 export declare type ItemInBase = {

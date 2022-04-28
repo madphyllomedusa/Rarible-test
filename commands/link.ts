@@ -95,13 +95,13 @@ function drawNFT(nftData: Item){
         context.fillRect(0,0,500,500)
         context.drawImage(background, 0,0,5000,500)
         //const buffer = canvas.toBuffer('image/png')
-<<<<<<< HEAD
+
         //context.drawImage(nftImage,150,400,2,2)
         context.fillStyle = "black"  
-=======
+
         //context.drawImage(nftImage,150,400,50,50)
         context.fillStyle = '#ffffff'  
->>>>>>> aebc73243da14c9b7ca04220e7e9ce01d01de867
+
         context.lineWidth = 2.0
         context.strokeStyle = '#fffff'
         context.beginPath()

@@ -25,7 +25,9 @@ export function rarityCounter(nftData: Item){
         let collectionVariants: CollectionAttibutes = {
             attributes: [],
             collectionId: nftData.collection?.toString()!,
-            collectionTotal: 0
+            collectionTotal: 0,
+            Acoff: 0,
+            Bcoff: 0,
         }
         apiLink = getItemsByCollectionRequest(nftData.collection!, 1000)
         console.log(`ITEMS BY COLLECTION REQUEST LINK ${apiLink}`)
@@ -33,6 +35,7 @@ export function rarityCounter(nftData: Item){
 
             console.log("INSIDE CHECK")
             await sendApiRequest(apiLink).then(data => {
+                console.log("INSIDE API CHECK")
                 request_passed = true
                 itemsCollection = data
                 amountItemsInCollection += itemsCollection.total
@@ -194,8 +197,17 @@ export function rarityCounter(nftData: Item){
                 console.log(`       AMOUNT: ${collectionVariants.attributes[i].values[j].amount}`)
             }
         }*/
+        let lineCoffs = {
+            Acoff: 0,
+            Bcoff: 0
+        }
         console.log(`POINTS AMOUNT: ${graphPoints.length}`)
-        graphDrow(graphPoints)
+        lineCoffs = await graphDrow(graphPoints)
+        collectionVariants.Acoff = lineCoffs.Acoff
+        collectionVariants.Bcoff = lineCoffs.Bcoff
+            
+        console.log(`COFFS: ${collectionVariants.Acoff}  ${collectionVariants.Bcoff}`)
+        console.log(collectionVariants)
         console.log(`RARITY SCORE RESOLVED`)
         resolve(collectionVariants)
 

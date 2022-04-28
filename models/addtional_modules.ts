@@ -125,8 +125,34 @@ function pointsSort(Points: Array<ScorePrice>){
    
     for (let i = 0; i < Points.length; ++i){
         console.log(`POINT #${i}: ${Points[i].score} / ${Points[i].price}`)
+        //console.log(parseFloat(Points[i].price!))
     }
     return Points
+}
+
+
+function apprCoff(Points: Array<ScorePrice>){
+    let A: number = 0
+    let B: number = 0
+    let sumXY: number = 0
+    let sumX: number = 0
+    let sumY: number = 0
+    let sumXX: number = 0
+    for(let i = 0; i < Points.length; ++i){
+        sumXY += parseFloat(Points[i].price!) * Points[i].score
+        sumX += Points[i].score
+        sumY += parseFloat(Points[i].price!)
+        sumXX += Points[i].score * Points[i].score
+    }
+    A = ((Points.length * sumXY) - (sumX * sumY)) / ((Points.length * sumXX) - (sumX * sumX))
+    console.log(`A COFF: ${A}`)
+    B = (sumY - (A * sumX)) / Points.length
+    console.log(`B COFF: ${B}`)
+    let result = {
+        Acoff: A,
+        Bcoff: B
+    }
+    return result
 }
 
 
@@ -135,45 +161,77 @@ export async function graphDrow(Points: Array<ScorePrice>){
     let hScore: number = Points[Points.length-1].score
     let lScore: number = Points[0].score
     let bar: number = (hScore - lScore) / 7
-
-    
+    let sizeX: number = 1500
+    let sizeY: number = 1000
+    let pixels_in_unitX: number = (sizeX - 60 - 20) / (hScore - lScore)
+    let maxPrice: number = parseFloat(Points[0].price!)
+    let minPrice: number = maxPrice
+    for(let i = 0; i < Points.length; ++i){
+        if(parseFloat(Points[i].price!) > maxPrice){
+            maxPrice = parseFloat(Points[i].price!)
+        }
+        if(parseFloat(Points[i].price!) < minPrice){
+            minPrice = parseFloat(Points[i].price!)
+        }
+    }
+    let pixels_in_unitY = (sizeY - 60 - 20) / (maxPrice - minPrice)
+    console.log(`MAX PRICE ${maxPrice} MIN PRICE ${minPrice}`)
+    console.log(`PRICE IN PIXELS ${pixels_in_unitY}`)
     let background = await loadImage(
         path.join(__dirname, '../test.png')
     )
     //let nftImage = await loadImage(`${nftData.meta?.content[0].url}`)
 
-    const canvas = createCanvas(1920, 1080)
+    const canvas = createCanvas(sizeX, sizeY)
     const context = canvas.getContext('2d')
     context.fillStyle = '#333333'
-    context.fillRect(0,0,500,500)
-    context.drawImage(background, 0,0,5000,500)
+    context.fillRect(0,0,sizeX,sizeY)
+    context.drawImage(background, 0,0,sizeX,sizeY)
     //const buffer = canvas.toBuffer('image/png')
     //context.drawImage(nftImage,150,400,2,2)
     context.fillStyle = "black"  
     context.lineWidth = 2.0
     context.beginPath()
     context.moveTo(50, 20)
-    context.lineTo(50, 460)
-    context.lineTo(460, 460)
+    context.lineTo(50, sizeY-50)
+    context.lineTo(sizeX - 20, sizeY-50)
     context.stroke()
     context.font = '20px sans-serif'
-    for(let i = 0; i < 5; i++) { 
-        context.fillText((5 - i) * 20 /*Переменная цены*/ + "", 4, i * 80 + 60) 
+    //for(let i = 0; i < 10; i++) { 
+    //    context.fillText((5 - i) * 100 /*Переменная цены*/ + "", 10, i * 80 + sizeY- 60) 
         
         
-    }
+    //}
     context.font = '20px sans-serif'
-    for(var i=0; i < 7; i++) { 
-        context.fillText((i+1) * Math.trunc(bar) + "", 90+ i*100, 480)
-    }
-    context.moveTo(50,460)
-    for(let i = 0; i<2/*переменная*/;i++){
+    //for(var i=0; i < 7; i++) { 
+    //    context.fillText((i+1) * Math.trunc(bar) + "", 90+ i*100, sizeY-10)
+    //}
+    //context.moveTo(sizeX-60,sizeY-60)
+    context.moveTo(60 , sizeY - 60 - (parseFloat(Points[0].price!) * pixels_in_unitY))
+    for(let i = 1; i<Points.length; i++){
+        
         context.strokeStyle = '#ffcc00'
-        context.lineTo(100/*Переменная скора - 50 */,120 /* переменная цены -460*/)
+        context.lineTo(Points[i].score * pixels_in_unitX, sizeY - 60 - (parseFloat(Points[i].price!) * pixels_in_unitY))
         context.stroke()
         //context.lineTo(70,140)   
     }
+    let lineCoffs = {
+        Acoff: 0,
+        Bcoff: 0
+    }
+    lineCoffs = apprCoff(Points)
+    console.log(`COFFS A ${lineCoffs.Acoff} B ${lineCoffs.Bcoff}`)
+    let startPos: number = lineCoffs.Acoff * Points[0].score + lineCoffs.Bcoff
+    context.beginPath()
+    context.moveTo(60, sizeY - 60 - startPos)
+    let endPos: number = lineCoffs.Acoff * Points[Points.length - 1].score + lineCoffs.Bcoff
+    context.lineTo(Points[Points.length - 1].score * pixels_in_unitX, sizeY - 60 - endPos)
+    context.strokeStyle = '#1338BE'
+    context.lineWidth = 6.0
+    context.stroke()
 
     const buffer = canvas.toBuffer('image/png')
     fs.writeFileSync('./commands/rarible.png',buffer)
+    return lineCoffs
+    
 }

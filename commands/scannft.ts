@@ -115,6 +115,8 @@ export default{
         const POLYGON_Collection: string = "POLYGON:0x35f8aee672cdE8e5FD09C93D2BfE4FF5a9cF0756" 
 
         const embed_Error_Link = new MessageEmbed().setImage('https://cdn.discordapp.com/attachments/967536440743448627/967536530681909288/wrongLinkRemoved.png')
+        const embed_Error_API = new MessageEmbed().setImage('https://cdn.discordapp.com/attachments/967536440743448627/967536509928472616/apiErrorRemover.png')
+        const embed_Error_Search = new MessageEmbed().setImage('https://cdn.discordapp.com/attachments/967536440743448627/967536519038529596/cantFindNftRemoved.png')
         const embed_Score_Counting = new MessageEmbed().setImage('https://cdn.discordapp.com/attachments/967536440743448627/968863419182755870/002-630x354.jpg')
 
         let ethOwner: string
@@ -123,7 +125,6 @@ export default{
         let attachment: MessageAttachment
         let itemRequest_passed: boolean = true
 
-        
 
         itemAPILink = getItemByIdRequestLinkSetup(sourceLink[0])
         console.log(`item request ${itemAPILink}`)
@@ -150,7 +151,7 @@ export default{
                 }else{
                     if(nftData.meta?.content[pos].url !== undefined){
                         Attachment = nftData.meta?.content[pos].url
-                        attachment = new MessageAttachment('../animation.mp4')
+                        //attachment = new MessageAttachment('../animation.mp4')
                         //embeds[0].video!.url = Attachment
                         //embeds[0].setImage(Attachment)
                         
@@ -189,6 +190,8 @@ export default{
                         embeds[embeds.length-1] = embed_Score_Counting
                         rarityCounter(nftData).then(data => {
                             collectionVariants = data
+                            console.log(`ATTRIBUTES FOR PRICE: ${data.Acoff}  ${data.Bcoff}`)
+                            console.log(`ATTRIBUTES FOR PRICE: ${collectionVariants.Acoff}  ${collectionVariants.Bcoff}`)
                             countedProperties = attributesToProperties(collectionVariants, nftData)
                             let rarityScore: number = 0
                             let rarityPerc: number = 0
@@ -201,6 +204,7 @@ export default{
                                 RarityScore += rarityScore
                                 console.log(`summary rarity score ${RarityScore}`)
                             }
+                            embeds[1].setFooter(`Page ${embeds.length}`)
                             embeds[1].setColor('#ffcc00')
                             if(nftData.meta?.attributes.length == 0 || nftData.meta?.attributes.length == undefined){
                                 embeds[1].setColor('#ffcc00')
@@ -230,9 +234,20 @@ export default{
                                     }
                                 }
                             }
+                            embeds.push(new MessageEmbed().setFooter(`Page ${embeds.length+1}`))
+                            attachment = new MessageAttachment('./commands/rarible.png')
+                            embeds[embeds.length-1].setImage('attachment://rarible.png')
+                            embeds[embeds.length-1].setTitle("Price analytics")
+                            embeds[embeds.length-1].setColor('#ffcc00')
+                            embeds[embeds.length-1].setDescription("Using math power, I can approximately predict NFT price based on other collection items.")
+                            console.log(`ATTRIBUTES FOR PRICE: ${collectionVariants.Acoff}  ${collectionVariants.Bcoff}`)
+                            let PredictedPrice = collectionVariants.Acoff * RarityScore + collectionVariants.Bcoff
+                            embeds[embeds.length-1].addField('Predicted price:', `${PredictedPrice.toFixed(2)}`)
                             reply.edit({
                                 embeds: [embeds[pages[id]],
+                                
                             ],
+                            //files: [attachment],
                             components: [getRow(id)],
                             })
                             
@@ -287,7 +302,7 @@ export default{
                 
                 const filter = (i: Interaction) => {
                     return i.user.id === user.id}
-                const time = 1000 * 60 * 2
+                const time = 1000 * 60 * 10
                 console.log(`user id ${user.id}`)
                 console.log(`interection id ${interaction.id}`)
       
@@ -346,18 +361,27 @@ export default{
                                
                                 components: [getRow(id)],
                                 //content: Attachment
-                                //files: attachment
+                                files: []
                                 
                             })
                            // channel.send({
                              //   content: Attachment
                             //})
                             
-                        }else {
+                        }else if(pages[id] == 2){
+                            console.log("PAGE 3")
                             reply.edit({
                                 embeds: [embeds[pages[id]],
                             ],
                             components: [getRow(id)],
+                            files: [attachment]
+                            })
+                        }else{
+                            reply.edit({
+                                embeds: [embeds[pages[id]],
+                            ],
+                            components: [getRow(id)],
+                            files: []
                             })
                         }
                     }else{
@@ -377,6 +401,7 @@ export default{
                                 embeds: [embeds[pages[id]],
                                 ],
                                 components: [getRow(id)],
+                                files: []
                             
                             })
                         }
