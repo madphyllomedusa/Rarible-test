@@ -50,13 +50,13 @@ let embeds:MessageEmbed[]
 
 export default{
     category: 'testing link',
-    description: 'reply link',
+    description: 'Analytics of NFT',
 
     slash: true,
     testOnly: true,
     options: [{
-        name: 'link3',
-        description: ' link from rarible 2',
+        name: 'link',
+        description: ' link from rarible',
         required: true,
         type: 'STRING',
     },
